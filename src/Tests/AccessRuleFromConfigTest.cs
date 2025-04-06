@@ -1,7 +1,5 @@
-using System.Collections.Generic;
 using System.Net;
 using Microsoft.Extensions.Configuration;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MuninNode;
 using MuninNode.AccessRules;
 

@@ -1,10 +1,6 @@
 // SPDX-FileCopyrightText: 2023 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 
-using System;
-using System.Threading;
-using System.Threading.Tasks;
-
 namespace MuninNode.Plugins;
 
 #pragma warning disable IDE0040
