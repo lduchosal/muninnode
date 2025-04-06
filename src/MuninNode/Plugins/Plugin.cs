@@ -31,7 +31,9 @@ public class Plugin : IPlugin, IPluginDataSource, INodeSessionCallback {
   )
   {
     if (string.IsNullOrEmpty(name))
+    {
       throw new ArgumentNullException(nameof(name));
+    }
 
     Name = name;
     GraphAttributes = graphAttributes ?? throw new ArgumentNullException(nameof(graphAttributes));

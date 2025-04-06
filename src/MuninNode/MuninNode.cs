@@ -19,62 +19,23 @@ namespace MuninNode;
 /// Provides an extensible base class with basic Munin-Node functionality.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/node/index.html">The Munin node</seealso>
-public class MuninNode : IMuninNode, IDisposable, IAsyncDisposable
+public class MuninNode(
+    ILogger<MuninNode> logger,
+    MuninNodeConfiguration config,
+    IPluginProvider pluginProvider,
+    IAccessRule accessRule,
+    ISocketCreator socketServer,
+    IEnumerable<ICommand> commands,
+    IDefaultCommand help)
+    : IMuninNode, IDisposable, IAsyncDisposable
 {
-    private MuninNodeConfiguration Config { get; set; }
-    private ISocketCreator SocketServer { get; set; }
-    private IAccessRule AccessRule { get; }
-    private IPluginProvider PluginProvider { get; }
     private Encoding Encoding => Encoding.Default;
-    private ILogger<MuninNode> Logger { get; }
-    
     private Socket? Server;
-
-    private EndPoint LocalEndPoint => Server?.LocalEndPoint ??
-                                      throw new InvalidOperationException("not yet bound or already disposed");
-
-    private ICommand ListCommand { get; }
-    private ICommand HelpCommand { get; }
-    private ICommand VersionCommand { get; }
-    private ICommand CapCommand { get; }
-    private ICommand NodeCommand { get; }
-    private ICommand FetchCommand { get; }
-    private ICommand ConfigCommand { get; }
-    
-    public MuninNode(
-        ILogger<MuninNode> logger,
-        MuninNodeConfiguration config,
-        IPluginProvider pluginProvider,
-        IAccessRule accessRule,
-        ISocketCreator socketServer, 
-        ListCommand listCommand, 
-        HelpCommand helpCommand, 
-        VersionCommand versionCommand, 
-        CapCommand capCommand, 
-        NodeCommand nodeCommand, 
-        FetchCommand fetchCommand, 
-        ConfigCommand configCommand)
-    {
-        PluginProvider = pluginProvider;
-        AccessRule = accessRule;
-        SocketServer = socketServer;
-        ListCommand = listCommand;
-        HelpCommand = helpCommand;
-        VersionCommand = versionCommand;
-        CapCommand = capCommand;
-        NodeCommand = nodeCommand;
-        FetchCommand = fetchCommand;
-        ConfigCommand = configCommand;
-        Config = config;
-        Logger = logger;
-    }
-
     public void Dispose()
     {
         Dispose(true);
         GC.SuppressFinalize(this);
     }
-
     public async ValueTask DisposeAsync()
     {
         await DisposeAsyncCore().ConfigureAwait(false);
@@ -116,12 +77,16 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
     protected virtual void Dispose(bool disposing)
     {
         if (!disposing)
+        {
             return;
+        }
 
         try
         {
             if (Server?.Connected ?? false)
+            {
                 Server.Disconnect(reuseSocket: false);
+            }
         }
         catch (SocketException)
         {
@@ -132,20 +97,6 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
         Server?.Dispose();
     }
 
-    protected void ThrowIfPluginProviderIsNull()
-    {
-        if (PluginProvider is null)
-            throw new InvalidOperationException($"{nameof(PluginProvider)} cannot be null");
-    }
-    
-    public void Start()
-    {
-        Logger.LogInformation($"starting");
-
-        Server = SocketServer.CreateServerSocket() ?? throw new InvalidOperationException("cannot start server");
-
-        Logger.LogInformation("started (end point: {LocalEndPoint})", Server.LocalEndPoint);
-    }
 
     /// <summary>
     /// Starts accepting multiple sessions.
@@ -158,7 +109,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken" /> to stop accepting sessions.
     /// </param>
-    public async ValueTask AcceptAsync(
+    private async ValueTask AcceptAsync(
         bool throwIfCancellationRequested,
         CancellationToken cancellationToken
     )
@@ -170,9 +121,13 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                 if (cancellationToken.IsCancellationRequested)
                 {
                     if (throwIfCancellationRequested)
+                    {
                         cancellationToken.ThrowIfCancellationRequested();
+                    }
                     else
+                    {
                         return;
+                    }
                 }
 
                 await AcceptSingleSessionAsync(cancellationToken).ConfigureAwait(false);
@@ -181,7 +136,9 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
         catch (OperationCanceledException ex)
         {
             if (throwIfCancellationRequested || ex.CancellationToken != cancellationToken)
+            {
                 throw;
+            }
 
             return;
         }
@@ -194,13 +151,11 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
     /// <param name="cancellationToken">
     /// The <see cref="CancellationToken" /> to stop accepting sessions.
     /// </param>
-    public async ValueTask AcceptSingleSessionAsync(
+    private async ValueTask AcceptSingleSessionAsync(
         CancellationToken cancellationToken = default
     )
     {
-        ThrowIfPluginProviderIsNull();
-
-        Logger.LogInformation("accepting...");
+        logger.LogInformation("accepting...");
 
         var client = await Server!
 #if SYSTEM_NET_SOCKETS_SOCKET_ACCEPTASYNC_CANCELLATIONTOKEN
@@ -220,7 +175,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 
             if (remoteEndPoint is null)
             {
-                Logger.LogWarning(
+                logger.LogWarning(
                     "cannot accept {RemoteEndPoint} ({RemoteEndPointAddressFamily})",
                     client.RemoteEndPoint?.ToString() ?? "(null)",
                     client.RemoteEndPoint?.AddressFamily
@@ -228,9 +183,9 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                 return;
             }
 
-            if (!AccessRule.IsAcceptable(remoteEndPoint))
+            if (!accessRule.IsAcceptable(remoteEndPoint))
             {
-                Logger.LogWarning("access refused: {RemoteEndPoint}", remoteEndPoint);
+                logger.LogWarning("access refused: {RemoteEndPoint}", remoteEndPoint);
                 return;
             }
 
@@ -238,14 +193,14 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            Logger.LogDebug("[{RemoteEndPoint}] sending banner", remoteEndPoint);
+            logger.LogDebug("[{RemoteEndPoint}] sending banner", remoteEndPoint);
 
             try
             {
                 await SendResponseAsync(
                     client,
                     Encoding,
-                    $"# munin node at {Config.Hostname}",
+                    [$"# munin node at {config.Hostname}"],
                     cancellationToken
                 ).ConfigureAwait(false);
             }
@@ -257,7 +212,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                     SocketError.ConnectionReset // ECONNRESET (104)
             )
             {
-                Logger.LogWarning(
+                logger.LogWarning(
                     "[{RemoteEndPoint}] client closed session while sending banner",
                     remoteEndPoint
                 );
@@ -267,7 +222,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 #pragma warning disable CA1031
             catch (Exception ex)
             {
-                Logger.LogCritical(
+                logger.LogCritical(
                     ex,
                     "[{RemoteEndPoint}] unexpected exception occured while sending banner",
                     remoteEndPoint
@@ -279,19 +234,23 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 
             cancellationToken.ThrowIfCancellationRequested();
 
-            Logger.LogInformation("[{RemoteEndPoint}] session started; ID={SessionId}", remoteEndPoint, sessionId);
+            logger.LogInformation("[{RemoteEndPoint}] session started; ID={SessionId}", remoteEndPoint, sessionId);
 
             try
             {
-                if (PluginProvider.SessionCallback is not null)
-                    await PluginProvider.SessionCallback.ReportSessionStartedAsync(sessionId, cancellationToken)
+                if (pluginProvider.SessionCallback is not null)
+                {
+                    await pluginProvider.SessionCallback.ReportSessionStartedAsync(sessionId, cancellationToken)
                         .ConfigureAwait(false);
+                }
 
-                foreach (var plugin in PluginProvider.Plugins)
+                foreach (var plugin in pluginProvider.Plugins)
                 {
                     if (plugin.SessionCallback is not null)
+                    {
                         await plugin.SessionCallback.ReportSessionStartedAsync(sessionId, cancellationToken)
                             .ConfigureAwait(false);
+                    }
                 }
 
 // https://docs.microsoft.com/ja-jp/dotnet/standard/io/pipelines
@@ -302,27 +261,30 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                     ProcessCommandAsync(client, remoteEndPoint, pipe.Reader, cancellationToken)
                 ).ConfigureAwait(false);
 
-                Logger.LogInformation("[{RemoteEndPoint}] session closed; ID={SessionId}", remoteEndPoint, sessionId);
+                logger.LogInformation("[{RemoteEndPoint}] session closed; ID={SessionId}", remoteEndPoint, sessionId);
             }
             finally
             {
-                foreach (var plugin in PluginProvider.Plugins)
+                foreach (var plugin in pluginProvider.Plugins)
                 {
                     if (plugin.SessionCallback is not null)
+                    {
                         await plugin.SessionCallback.ReportSessionClosedAsync(sessionId, cancellationToken)
                             .ConfigureAwait(false);
+                    }
                 }
 
-                if (PluginProvider.SessionCallback is not null)
-                    await PluginProvider.SessionCallback.ReportSessionClosedAsync(sessionId, cancellationToken)
+                if (pluginProvider.SessionCallback is not null)
+                {
+                    await pluginProvider.SessionCallback.ReportSessionClosedAsync(sessionId, cancellationToken)
                         .ConfigureAwait(false);
+                }
             }
         }
         finally
         {
             client.Close();
-
-            Logger.LogInformation("[{RemoteEndPoint}] connection closed", remoteEndPoint);
+            logger.LogInformation("[{RemoteEndPoint}] connection closed", remoteEndPoint);
         }
     }
 
@@ -331,12 +293,12 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 #if SYSTEM_SECURITY_CRYPTOGRAPHY_SHA1_HASHSIZEINBYTES
 const int SHA1HashSizeInBytes = SHA1.HashSizeInBytes;
 #else
-        const int SHA1HashSizeInBytes = 160 /*bits*/ / 8;
+        const int sha1HashSizeInBytes = 160 /*bits*/ / 8;
 #endif
 
         var sessionIdentity = Encoding.ASCII.GetBytes($"{localEndPoint}\n{remoteEndPoint}\n{DateTimeOffset.Now:o}");
 
-        Span<byte> sha1hash = stackalloc byte[SHA1HashSizeInBytes];
+        Span<byte> sha1Hash = stackalloc byte[sha1HashSizeInBytes];
 
 #pragma warning disable CA5350
 #if SYSTEM_SECURITY_CRYPTOGRAPHY_SHA1_TRYHASHDATA
@@ -344,11 +306,11 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
 #else
         using var sha1 = SHA1.Create();
 
-        sha1.TryComputeHash(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
+        sha1.TryComputeHash(sessionIdentity, sha1Hash, out var bytesWrittenSHA1);
 #endif
 #pragma warning restore CA5350
 
-        return Convert.ToBase64String(sha1hash);
+        return Convert.ToBase64String(sha1Hash);
     }
 
     private async Task ReceiveCommandAsync(
@@ -358,18 +320,20 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
         CancellationToken cancellationToken
     )
     {
-        const int MinimumBufferSize = 256;
+        const int minimumBufferSize = 256;
 
         for (;;)
         {
             cancellationToken.ThrowIfCancellationRequested();
 
-            var memory = writer.GetMemory(MinimumBufferSize);
+            var memory = writer.GetMemory(minimumBufferSize);
 
             try
             {
                 if (!socket.Connected)
+                {
                     break;
+                }
 
                 var bytesRead = await socket.ReceiveAsync(
                     buffer: memory,
@@ -378,7 +342,9 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
                 ).ConfigureAwait(false);
 
                 if (bytesRead == 0)
+                {
                     break;
+                }
 
                 writer.Advance(bytesRead);
             }
@@ -388,7 +354,7 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
                     SocketError.ConnectionReset // ECONNRESET (104)
             )
             {
-                Logger.LogInformation(
+                logger.LogInformation(
                     "[{RemoteEndPoint}] expected socket exception ({NumericSocketErrorCode} {SocketErrorCode})",
                     remoteEndPoint,
                     (int)ex.SocketErrorCode,
@@ -398,7 +364,7 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
             }
             catch (ObjectDisposedException)
             {
-                Logger.LogInformation(
+                logger.LogInformation(
                     "[{RemoteEndPoint}] socket has been disposed",
                     remoteEndPoint
                 );
@@ -406,30 +372,30 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
             }
             catch (OperationCanceledException)
             {
-                Logger.LogInformation(
+                logger.LogInformation(
                     "[{RemoteEndPoint}] operation canceled",
                     remoteEndPoint
                 );
                 throw;
             }
-#pragma warning disable CA1031
             catch (Exception ex)
             {
-                Logger.LogCritical(
+                logger.LogCritical(
                     ex,
                     "[{RemoteEndPoint}] unexpected exception while receiving",
                     remoteEndPoint
                 );
                 break;
             }
-#pragma warning restore CA1031
 
             var result = await writer.FlushAsync(
                 cancellationToken: cancellationToken
             ).ConfigureAwait(false);
 
             if (result.IsCompleted)
+            {
                 break;
+            }
         }
 
         await writer.CompleteAsync().ConfigureAwait(false);
@@ -453,7 +419,7 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
 
             try
             {
-                while (TryReadLine(ref buffer, out var line))
+                while (Sequence.TryReadLine(ref buffer, out var line))
                 {
                     await RespondToCommandAsync(
                         client: socket,
@@ -464,7 +430,7 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
             }
             catch (OperationCanceledException)
             {
-                Logger.LogInformation(
+                logger.LogInformation(
                     "[{RemoteEndPoint}] operation canceled",
                     remoteEndPoint
                 );
@@ -473,14 +439,17 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
 #pragma warning disable CA1031
             catch (Exception ex)
             {
-                Logger.LogCritical(
+                logger.LogCritical(
                     ex,
                     "[{RemoteEndPoint}] unexpected exception while processing command",
                     remoteEndPoint
                 );
 
                 if (socket.Connected)
+                {
                     socket.Close();
+                }
+
                 break;
             }
 #pragma warning restore CA1031
@@ -488,31 +457,11 @@ SHA1.TryHashData(sessionIdentity, sha1hash, out var bytesWrittenSHA1);
             reader.AdvanceTo(buffer.Start, buffer.End);
 
             if (result.IsCompleted)
-                break;
-        }
-
-        static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
-        {
-            var reader = new SequenceReader<byte>(buffer);
-            const byte LF = (byte)'\n';
-
-            if (
-                !reader.TryReadTo(out line, delimiter: "\r\n"u8, advancePastDelimiter: true) &&
-                !reader.TryReadTo(out line, delimiter: LF, advancePastDelimiter: true)
-            )
             {
-                line = default;
-                return false;
+                break;
             }
-
-#if SYSTEM_BUFFERS_SEQUENCEREADER_UNREADSEQUENCE
-buffer = reader.UnreadSequence;
-#else
-            buffer = reader.Sequence.Slice(reader.Position);
-#endif
-
-            return true;
         }
+
     }
 
     private static bool ExpectCommand(
@@ -526,21 +475,23 @@ buffer = reader.UnreadSequence;
         var reader = new SequenceReader<byte>(commandLine);
 
         if (!reader.IsNext(expectedCommand, advancePast: true))
+        {
             return false;
+        }
 
         const byte space = (byte)' ';
 
         if (reader.Remaining == 0)
         {
-// <command> <EOL>
+            // <command> <EOL>
             arguments = default;
             return true;
         }
         else if (reader.IsNext(space, advancePast: true))
         {
-// <command> <SP> <arguments> <EOL>
+            // <command> <SP> <arguments> <EOL>
 #if SYSTEM_BUFFERS_SEQUENCEREADER_UNREADSEQUENCE
-arguments = reader.UnreadSequence;
+            arguments = reader.UnreadSequence;
 #else
             arguments = reader.Sequence.Slice(reader.Position);
 #endif
@@ -549,56 +500,35 @@ arguments = reader.UnreadSequence;
 
         return false;
     }
-
-    private static readonly byte CommandQuitShort = (byte)'.';
-
     private async ValueTask RespondToCommandAsync(
         Socket client,
         ReadOnlySequence<byte> commandLine,
         CancellationToken cancellationToken
     )
     {
-
-        string[] result = [];
-        if (ExpectCommand(commandLine, "fetch"u8, out var fetchArguments))
-        {
-            result = await FetchCommand.ProcessAsync(fetchArguments, cancellationToken);
-        }
-        else if (ExpectCommand(commandLine, "nodes"u8, out var nodeargs))
-        {
-            result = await NodeCommand.ProcessAsync(nodeargs, cancellationToken);
-        }
-        else if (ExpectCommand(commandLine, "list"u8, out var listargs))
-        {
-            result = await ListCommand.ProcessAsync(listargs, cancellationToken);
-        }
-        else if (ExpectCommand(commandLine, "config"u8, out var configArguments))
-        {
-            result = await ConfigCommand.ProcessAsync(configArguments, cancellationToken);
-        }
-        else if (
-            ExpectCommand(commandLine, "quit"u8, out _) ||
-            (commandLine.Length == 1 && commandLine.FirstSpan[0] == CommandQuitShort)
+        if (
+            ExpectCommand(commandLine, "quit"u8, out _) 
+            || ExpectCommand(commandLine, "."u8, out _) // quit short
         )
         {
             client.Close();
-#if SYSTEM_THREADING_TASKS_VALUETASK_COMPLETEDTASK
-return ValueTask.CompletedTask;
-#else
             return;
-#endif
         }
-        else if (ExpectCommand(commandLine, "cap"u8, out var capArguments))
+        
+        string[] result = [];
+        bool matched = false;
+        foreach (var command in commands)
         {
-            result = await CapCommand.ProcessAsync(capArguments, cancellationToken);
+            if (ExpectCommand(commandLine, command.Name, out var args))
+            {
+                result = await command.ProcessAsync(args, cancellationToken);
+                matched = true;
+                break;
+            }
         }
-        else if (ExpectCommand(commandLine, "version"u8, out var versionargs))
+        if (!matched)
         {
-            result = await VersionCommand.ProcessAsync(versionargs, cancellationToken);
-        }
-        else
-        {
-            result = await HelpCommand.ProcessAsync(ReadOnlySequence<byte>.Empty, cancellationToken);
+            result = await help.ProcessAsync(ReadOnlySequence<byte>.Empty, cancellationToken);
         }
         
         await SendResponseAsync(
@@ -607,26 +537,9 @@ return ValueTask.CompletedTask;
             responseLines: result,
             cancellationToken: cancellationToken
         );
-
     }
 
-#pragma warning disable IDE0230
     private static readonly ReadOnlyMemory<byte> EndOfLine = new[] { (byte)'\n' };
-#pragma warning restore IDE0230
-
-
-    private static ValueTask SendResponseAsync(
-        Socket client,
-        Encoding encoding,
-        string responseLine,
-        CancellationToken cancellationToken
-    )
-        => SendResponseAsync(
-            client: client,
-            encoding: encoding,
-            responseLines: Enumerable.Repeat(responseLine, 1),
-            cancellationToken: cancellationToken
-        );
 
     private static async ValueTask SendResponseAsync(
         Socket client,
@@ -635,8 +548,7 @@ return ValueTask.CompletedTask;
         CancellationToken cancellationToken
     )
     {
-        if (responseLines == null)
-            throw new ArgumentNullException(nameof(responseLines));
+        ArgumentNullException.ThrowIfNull(responseLines);
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -658,11 +570,11 @@ return ValueTask.CompletedTask;
         }
     }
 
-
-
     public async Task RunAsync(CancellationToken stoppingToken)
     {
-        Start();
+        logger.LogInformation($"starting");
+        Server = socketServer.CreateServerSocket() ?? throw new InvalidOperationException("cannot start server");
+        logger.LogInformation("started (end point: {LocalEndPoint})", Server.LocalEndPoint);
         await AcceptAsync(false, stoppingToken);
     }
 }

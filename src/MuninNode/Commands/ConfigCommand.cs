@@ -6,6 +6,8 @@ namespace MuninNode.Commands;
 
 public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 {
+    public ReadOnlySpan<byte> Name => "config"u8;
+
     private Encoding Encoding => Encoding.Default;
     private static readonly string[] ResponseLinesUnknownService =
     [
@@ -45,13 +47,19 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             var draw = TranslateFieldDrawAttribute(fieldAttrs.GraphStyle);
 
             if (draw is not null)
+            {
                 responseLines.Add($"{field.Name}.draw {draw}");
+            }
 
             if (fieldAttrs.NormalRangeForWarning.HasValue)
+            {
                 AddFieldValueRange("warning", fieldAttrs.NormalRangeForWarning);
+            }
 
             if (fieldAttrs.NormalRangeForCritical.HasValue)
+            {
                 AddFieldValueRange("critical", fieldAttrs.NormalRangeForCritical);
+            }
 
             if (!string.IsNullOrEmpty(fieldAttrs.NegativeFieldName))
             {
@@ -60,24 +68,36 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
                 );
 
                 if (negativeField is not null)
+                {
                     responseLines.Add($"{field.Name}.negative {negativeField.Name}");
+                }
             }
 
 // this field is defined as the negative field of other field, so should not be graphed
             if (IsNegativeField(field, plugin.DataSource.Fields))
+            {
                 graph = false;
+            }
 
             if (graph is bool drawGraph)
+            {
                 responseLines.Add($"{field.Name}.graph {(drawGraph ? "yes" : "no")}");
+            }
 
             void AddFieldValueRange(string attr, PluginFieldNormalValueRange range)
             {
                 if (range.Min.HasValue && range.Max.HasValue)
+                {
                     responseLines.Add($"{field.Name}.{attr} {range.Min.Value}:{range.Max.Value}");
+                }
                 else if (range.Min.HasValue)
+                {
                     responseLines.Add($"{field.Name}.{attr} {range.Min.Value}:");
+                }
                 else if (range.Max.HasValue)
+                {
                     responseLines.Add($"{field.Name}.{attr} :{range.Max.Value}");
+                }
             }
         }
 
@@ -92,7 +112,8 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
         return Task.FromResult(responseLines.ToArray());
 
     }
-    
+
+
     private static string? TranslateFieldDrawAttribute(GraphStyle style)
         => style switch
         {

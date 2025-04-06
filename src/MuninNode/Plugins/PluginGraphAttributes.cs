@@ -92,17 +92,34 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes {
   )
   {
     if (string.IsNullOrEmpty(title))
+    {
       throw new ArgumentNullException(nameof(title));
+    }
+
     if (string.IsNullOrEmpty(category))
+    {
       throw new ArgumentNullException(nameof(category));
+    }
+
     if (string.IsNullOrEmpty(arguments))
+    {
       throw new ArgumentNullException(nameof(arguments));
+    }
+
     if (string.IsNullOrEmpty(verticalLabel))
+    {
       throw new ArgumentNullException(nameof(verticalLabel));
+    }
+
     if (width.HasValue && width.Value <= 0)
+    {
       throw new ArgumentNullException(nameof(width));
+    }
+
     if (height.HasValue && height.Value <= 0)
+    {
       throw new ArgumentNullException(nameof(height));
+    }
 
     Title = title;
     Category = category;
@@ -115,7 +132,9 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes {
     TotalValueLabel = totalValueLabel;
 
     if (updateRate.HasValue && updateRate.Value < TimeSpan.FromSeconds(1.0))
+    {
       throw new ArgumentOutOfRangeException(nameof(updateRate), updateRate, "must be at least 1 seconds");
+    }
 
     UpdateRate = updateRate;
   }
@@ -129,14 +148,28 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes {
     yield return $"graph_vlabel {VerticalLabel}";
 
     if (UpdateRate.HasValue)
+    {
       yield return $"update_rate {(int)UpdateRate.Value.TotalSeconds}";
+    }
+
     if (Width.HasValue)
+    {
       yield return $"graph_width {Width.Value}";
+    }
+
     if (Height.HasValue)
+    {
       yield return $"graph_height {Height.Value}";
+    }
+
     if (!string.IsNullOrEmpty(Order))
+    {
       yield return $"graph_order {Order}";
+    }
+
     if (!string.IsNullOrEmpty(TotalValueLabel))
+    {
       yield return $"graph_total {TotalValueLabel}";
+    }
   }
 }

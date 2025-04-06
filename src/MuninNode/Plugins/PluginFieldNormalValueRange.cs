@@ -18,9 +18,14 @@ public readonly struct PluginFieldNormalValueRange {
   private static double ValidateValue(double val, string paramName)
   {
     if (double.IsNaN(val))
+    {
       throw new ArgumentOutOfRangeException(message: "The value must be a finite number.", paramName: paramName);
+    }
+
     if (double.IsInfinity(val))
+    {
       throw new ArgumentOutOfRangeException(message: "The value must be a finite number.", paramName: paramName);
+    }
 
     return val;
   }

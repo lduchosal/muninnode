@@ -4,6 +4,7 @@ namespace MuninNode.Commands;
 
 public class VersionCommand(MuninNodeConfiguration config) : ICommand
 {
+    public ReadOnlySpan<byte> Name => "version"u8;
     private static readonly Version DefaultNodeVersion = new(1, 0, 0, 0);
     private Version NodeVersion => DefaultNodeVersion;
 

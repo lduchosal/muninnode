@@ -81,7 +81,9 @@ public readonly struct PluginFieldAttributes {
   )
   {
     if (string.IsNullOrEmpty(label))
+    {
       throw new ArgumentNullException(nameof(label));
+    }
 
     Label = label;
     GraphStyle = graphStyle;

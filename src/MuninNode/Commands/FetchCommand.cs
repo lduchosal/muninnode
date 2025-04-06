@@ -4,8 +4,9 @@ using MuninNode.Plugins;
 
 namespace MuninNode.Commands;
 
-public class FetchCommand(IPluginProvider pluginProvider) : ICommand
+public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCommand
 {
+    public ReadOnlySpan<byte> Name => "fetch"u8;
     private Encoding Encoding => Encoding.Default;
 
     private static readonly string[] ResponseLinesUnknownService =
@@ -39,4 +40,5 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand
         responseLines.Add(".");
         return responseLines.ToArray();
     }
+
 }

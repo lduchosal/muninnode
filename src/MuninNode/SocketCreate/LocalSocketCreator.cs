@@ -51,7 +51,9 @@ public class LocalSocketCreator : ISocketCreator
             );
 
             if (endPoint.AddressFamily == AddressFamily.InterNetworkV6 && Socket.OSSupportsIPv4)
+            {
                 server.DualMode = true;
+            }
 
             server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
             server.Bind(endPoint);
