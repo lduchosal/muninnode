@@ -109,12 +109,12 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes
             throw new ArgumentNullException(nameof(verticalLabel));
         }
 
-        if (width.HasValue && width.Value <= 0)
+        if (width is <= 0)
         {
             throw new ArgumentNullException(nameof(width));
         }
 
-        if (height.HasValue && height.Value <= 0)
+        if (height is <= 0)
         {
             throw new ArgumentNullException(nameof(height));
         }

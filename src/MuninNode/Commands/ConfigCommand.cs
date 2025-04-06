@@ -8,12 +8,12 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 {
     public ReadOnlySpan<byte> Name => "config"u8;
 
-    private Encoding Encoding => Encoding.Default;
+    private static Encoding Encoding => Encoding.Default;
 
     private static readonly string[] ResponseLinesUnknownService =
     [
         "# Unknown service",
-        ".",
+        "."
     ];
 
     public Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
@@ -84,10 +84,10 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             {
                 responseLines.Add($"{field.Name}.graph {(drawGraph ? "yes" : "no")}");
             }
-
+            
             void AddFieldValueRange(string attr, PluginFieldNormalValueRange range)
             {
-                if (range.Min.HasValue && range.Max.HasValue)
+                if (range is { Min: not null, Max: not null })
                 {
                     responseLines.Add($"{field.Name}.{attr} {range.Min.Value}:{range.Max.Value}");
                 }
@@ -129,6 +129,6 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             GraphStyle.LineStackWidth1 => "LINE1STACK",
             GraphStyle.LineStackWidth2 => "LINE2STACK",
             GraphStyle.LineStackWidth3 => "LINE3STACK",
-            _ => throw new InvalidOperationException($"undefined draw attribute value: ({(int)style} {style})"),
+            _ => throw new InvalidOperationException($"undefined draw attribute value: ({(int)style} {style})")
         };
 }

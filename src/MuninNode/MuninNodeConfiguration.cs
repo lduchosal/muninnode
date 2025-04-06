@@ -11,7 +11,7 @@ public sealed class MuninNodeConfiguration
     public List<IPAddress> AllowFrom { get; init; } = [ IPAddress.Loopback, IPAddress.IPv6Loopback ];
 }
 
-public static class IConfigurationExt
+public static class ConfigurationExt
 {
     public static MuninNodeConfiguration BuildMuninNodeConfig(this IConfiguration? configuration)
     {
@@ -21,7 +21,7 @@ public static class IConfigurationExt
             Listen = configuration?["MuninNode:Listen"]?.ToIPAddress() ?? IPAddress.Loopback,
             Hostname = configuration?["MuninNode:Hostname"] ?? "localhost",
             AllowFrom = configuration?["MuninNode:AllowFrom"]?.ToNetworkList() ??
-            [IPAddress.Loopback, IPAddress.IPv6Loopback],
+            [IPAddress.Loopback, IPAddress.IPv6Loopback]
         };
     }
 }
@@ -39,11 +39,11 @@ public static class StringExt
         var result = s.Split([' ', ',', ';'])
                 .Select(s =>
                 {
-                    bool parsed = IPAddress.TryParse(s, out var ipAddress);
+                    var parsed = IPAddress.TryParse(s, out var ipAddress);
                     return new
                     {
                         IP = ipAddress,
-                        Parsed = parsed,
+                        Parsed = parsed
                     };
                 })
                 .Where(p => p.Parsed)

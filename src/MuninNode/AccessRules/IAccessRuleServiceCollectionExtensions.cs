@@ -7,7 +7,7 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace MuninNode.AccessRules;
 
-public static class IAccessRuleServiceCollectionExtensions
+public static class AccessRuleServiceCollectionExtensions
 {
     /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
     /// <param name="addressListAllowFrom">The <see cref="IReadOnlyList{T}"/> indicates the read-only list of addresses allowed to access <see cref="MuninNode"/>.</param>

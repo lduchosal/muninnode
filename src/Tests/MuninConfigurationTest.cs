@@ -58,7 +58,7 @@ public class MuninNodeConfigurationTest {
       {"MuninNode:Port", "9876"},
       {"MuninNode:Hostname", "appsettings"},
       {"MuninNode:Listen", "::1"},
-      {"MuninNode:AllowFrom", "127.0.0.1, 1.2.3.4, 5.6.7.8, 10.10.10.10"},
+      {"MuninNode:AllowFrom", "127.0.0.1, 1.2.3.4, 5.6.7.8, 10.10.10.10"}
     };
 
     var configuration = new ConfigurationBuilder()

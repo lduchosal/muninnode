@@ -92,7 +92,7 @@ partial class PluginFactory
 
     private sealed class ValueFromFuncPluginField : PluginFieldBase
     {
-        private readonly Func<double?> fetchValue;
+        private readonly Func<double?> FetchValue;
 
         public ValueFromFuncPluginField(
             string label,
@@ -112,10 +112,10 @@ partial class PluginFactory
                 negativeFieldName: negativeFieldName
             )
         {
-            this.fetchValue = fetchValue ?? throw new ArgumentNullException(nameof(fetchValue));
+            this.FetchValue = fetchValue ?? throw new ArgumentNullException(nameof(fetchValue));
         }
 
         protected override ValueTask<double?> FetchValueAsync(CancellationToken cancellationToken)
-            => new(fetchValue());
+            => new(FetchValue());
     }
 }

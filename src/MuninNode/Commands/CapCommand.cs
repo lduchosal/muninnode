@@ -11,7 +11,7 @@ public class CapCommand : ICommand
         // TODO: multigraph (https://guide.munin-monitoring.org/en/latest/plugin/protocol-multigraph.html)
         // TODO: dirtyconfig (https://guide.munin-monitoring.org/en/latest/plugin/protocol-dirtyconfig.html)
         // XXX: ignores capability arguments
-        var result = "cap";
+        const string result = "cap";
         return Task.FromResult<string[]>([result]);
     }
 }

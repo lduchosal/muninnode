@@ -8,11 +8,11 @@ namespace MuninNode.AccessRules;
 
 internal sealed class AddressListAccessRule : IAccessRule
 {
-    private readonly IReadOnlyList<IPAddress> addressListAllowFrom;
+    private readonly IReadOnlyList<IPAddress> AddressListAllowFrom;
 
     public AddressListAccessRule(IReadOnlyList<IPAddress> addressListAllowFrom)
     {
-        this.addressListAllowFrom =
+        this.AddressListAllowFrom =
             addressListAllowFrom ?? throw new ArgumentNullException(nameof(addressListAllowFrom));
     }
 
@@ -22,7 +22,7 @@ internal sealed class AddressListAccessRule : IAccessRule
 
         var remoteAddress = remoteEndPoint.Address;
 
-        foreach (var addressAllowFrom in addressListAllowFrom)
+        foreach (var addressAllowFrom in AddressListAllowFrom)
         {
             if (addressAllowFrom.AddressFamily == AddressFamily.InterNetwork)
             {

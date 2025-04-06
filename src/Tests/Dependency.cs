@@ -38,21 +38,35 @@ public static class Dependency
             .AddScoped<IAccessRule, AccessRuleFromConfig>()
             .AddScoped<MuninNodeConfiguration>(_ => configuration.BuildMuninNodeConfig())
 
-            .AddScoped<CapCommand>()
-            .AddScoped<ConfigCommand>()
-            .AddScoped<FetchCommand>()
-            .AddScoped<HelpCommand>()
-            .AddScoped<ListCommand>()
-            .AddScoped<NodeCommand>()
-            .AddScoped<VersionCommand>()
+            .AddScoped<ICommand, CapCommand>()
+            .AddScoped<ICommand, ConfigCommand>()
+            .AddScoped<ICommand, FetchCommand>()
+            .AddScoped<ICommand, HelpCommand>()
+            .AddScoped<ICommand, ListCommand>()
+            .AddScoped<ICommand, NodeCommand>()
+            .AddScoped<ICommand, VersionCommand>()
+            .AddScoped<IDefaultCommand, HelpCommand>()
             ;
 
         return services;
     }
 }
 
-public class EmptyPluginProvider(INodeSessionCallback sessionCallback) : IPluginProvider
+public class EmptyPluginProvider : IPluginProvider
 {
     public IReadOnlyCollection<IPlugin> Plugins { get; } = [];
-    public INodeSessionCallback SessionCallback { get; } = sessionCallback;
+    public INodeSessionCallback SessionCallback { get; } = new NodeSessionCallback();
+}
+
+public class NodeSessionCallback : INodeSessionCallback
+{
+    public ValueTask ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
+
+    public ValueTask ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
+    {
+        throw new NotImplementedException();
+    }
 }

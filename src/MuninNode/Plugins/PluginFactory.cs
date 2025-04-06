@@ -3,6 +3,4 @@
 
 namespace MuninNode.Plugins;
 
-public static partial class PluginFactory
-{
-}
+public static partial class PluginFactory;

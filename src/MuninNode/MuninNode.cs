@@ -29,7 +29,7 @@ public class MuninNode(
     IDefaultCommand help)
     : IMuninNode, IDisposable, IAsyncDisposable
 {
-    private Encoding Encoding => Encoding.Default;
+    private static Encoding Encoding => Encoding.Default;
     private Socket? Server;
     public void Dispose()
     {
@@ -417,15 +417,16 @@ public class MuninNode(
         }
         
         string[] result = [];
-        bool matched = false;
+        var matched = false;
         foreach (var command in commands)
         {
-            if (commandLine.Expect(command.Name, out var args))
+            if (!commandLine.Expect(command.Name, out var args))
             {
-                result = await command.ProcessAsync(args, cancellationToken);
-                matched = true;
-                break;
+                continue;
             }
+            result = await command.ProcessAsync(args, cancellationToken);
+            matched = true;
+            break;
         }
         if (!matched)
         {

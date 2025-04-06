@@ -23,5 +23,5 @@ public enum GraphStyle
     LineStack = 200,
     LineStackWidth1 = 201,
     LineStackWidth2 = 202,
-    LineStackWidth3 = 203,
+    LineStackWidth3 = 203
 }

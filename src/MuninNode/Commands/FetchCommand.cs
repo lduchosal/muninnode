@@ -7,12 +7,12 @@ namespace MuninNode.Commands;
 public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCommand
 {
     public ReadOnlySpan<byte> Name => "fetch"u8;
-    private Encoding Encoding => Encoding.Default;
+    private static Encoding Encoding => Encoding.Default;
 
     private static readonly string[] ResponseLinesUnknownService =
     [
         "# Unknown service",
-        ".",
+        "."
     ];
 
     public async Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)

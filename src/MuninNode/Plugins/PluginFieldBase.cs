@@ -93,11 +93,11 @@ public abstract class PluginFieldBase : IPluginField
 #pragma warning disable CA1033
     async ValueTask<string> IPluginField.GetFormattedValueStringAsync(CancellationToken cancellationToken)
     {
-        const string UnknownValueString = "U";
+        const string unknownValueString = "U";
 
         var value = await FetchValueAsync(cancellationToken).ConfigureAwait(false);
 
-        return value?.ToString(provider: CultureInfo.InvariantCulture) ?? UnknownValueString;
+        return value?.ToString(provider: CultureInfo.InvariantCulture) ?? unknownValueString;
     }
 #pragma warning restore CA1033
 
@@ -115,17 +115,17 @@ public abstract class PluginFieldBase : IPluginField
 //   The characters must be [a-zA-Z0-9_], while the first character must be [a-zA-Z_].
 #pragma warning disable SYSLIB1045
     private static readonly Regex RegexValidFieldName = new(
-        pattern: $@"^[a-zA-Z_][a-zA-Z0-9_]*$",
+        pattern: @"^[a-zA-Z_][a-zA-Z0-9_]*$",
         options: RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.CultureInvariant
     );
 
     private static readonly Regex RegexInvalidFieldNamePrefix = new(
-        pattern: $@"^[0-9_]+",
+        pattern: @"^[0-9_]+",
         options: RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.CultureInvariant
     );
 
     private static readonly Regex RegexInvalidFieldNameChars = new(
-        pattern: $@"[^a-zA-Z0-9_]",
+        pattern: @"[^a-zA-Z0-9_]",
         options: RegexOptions.Singleline | RegexOptions.Compiled | RegexOptions.CultureInvariant
     );
 #pragma warning restore SYSLIB1045

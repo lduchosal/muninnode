@@ -19,18 +19,18 @@ public class SocketCreatorTest
         var appsettings = new Dictionary<string, string?>
         {
             { "MuninNode:Listen", listen },
-            { "MuninNode:Port", $"{port}" },
+            { "MuninNode:Port", $"{port}" }
         };
         var configuration = new ConfigurationBuilder()
             .AddInMemoryCollection(appsettings)
             .Build();
 
         var config = configuration.BuildMuninNodeConfig();
-        ISocketCreator scoketCreator = new SocketCreator(config);
+        var socketCreator = new SocketCreator(config);
 
         // Act
 
-        using var socket = scoketCreator.CreateServerSocket();
+        using var socket = socketCreator.CreateServerSocket();
 
         // Assert
 
