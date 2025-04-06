@@ -7,10 +7,10 @@ namespace MuninNode;
 
 public sealed class MuninNodeConfiguration
 {
-    public IPAddress Listen { get; init; } = null!;
-    public int Port { get; init; }
-    public string Hostname { get; init; } = null!;
-    public List<IPAddress> AllowFrom { get; init; } = null!;
+    public IPAddress Listen { get; init; } = IPAddress.Loopback;
+    public int Port { get; init; } = 4949;
+    public string Hostname { get; init; } = "localhost";
+    public List<IPAddress> AllowFrom { get; init; } = [ IPAddress.Loopback, IPAddress.IPv6Loopback ];
 }
 
 public static class IConfigurationExt

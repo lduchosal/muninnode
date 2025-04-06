@@ -1,8 +1,10 @@
 using System.Collections.Generic;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using MuninNode;
 using MuninNode.AccessRules;
+using MuninNode.Commands;
 using MuninNode.Plugins;
 using MuninNode.SocketCreate;
 
@@ -30,11 +32,20 @@ public static class Dependency {
 
     services
       .AddLogging()
+      
       .AddScoped<IMuninNode, MuninNode.MuninNode>()
       .AddScoped<ISocketCreator, SocketCreator>()
       .AddScoped<IPluginProvider, EmptyPluginProvider>()
       .AddScoped<IAccessRule, AccessRuleFromConfig>()
-      .AddScoped<MuninNodeConfiguration>()
+      .AddScoped<MuninNodeConfiguration>(provider => configuration.BuildMuninNodeConfig())
+      
+      .AddScoped<CapCommand>()
+      .AddScoped<ConfigCommand>()
+      .AddScoped<FetchCommand>()
+      .AddScoped<HelpCommand>()
+      .AddScoped<ListCommand>()
+      .AddScoped<NodeCommand>()
+      .AddScoped<VersionCommand>()
       ;
 
     return services;

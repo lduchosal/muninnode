@@ -1,17 +1,12 @@
 // SPDX-FileCopyrightText: 2021 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 
-using System;
 using System.Buffers;
-using System.Collections.Generic;
 using System.IO.Pipelines;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using MuninNode.AccessRules;
 using MuninNode.Commands;
@@ -24,43 +19,53 @@ namespace MuninNode;
 /// Provides an extensible base class with basic Munin-Node functionality.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/node/index.html">The Munin node</seealso>
-public abstract class MuninNode : IMuninNode, IDisposable, IAsyncDisposable
+public class MuninNode : IMuninNode, IDisposable, IAsyncDisposable
 {
-    private static readonly Version DefaultNodeVersion = new(1, 0, 0, 0);
-    
+    private MuninNodeConfiguration Config { get; set; }
     private ISocketCreator SocketServer { get; set; }
     private IAccessRule AccessRule { get; }
     private IPluginProvider PluginProvider { get; }
-    private string HostName { get; }
-
-    private Version NodeVersion => DefaultNodeVersion;
     private Encoding Encoding => Encoding.Default;
-
     private ILogger<MuninNode> Logger { get; }
-
-
-    private Socket Server;
+    
+    private Socket? Server;
 
     private EndPoint LocalEndPoint => Server?.LocalEndPoint ??
                                       throw new InvalidOperationException("not yet bound or already disposed");
 
     private ICommand ListCommand { get; }
+    private ICommand HelpCommand { get; }
+    private ICommand VersionCommand { get; }
+    private ICommand CapCommand { get; }
+    private ICommand NodeCommand { get; }
+    private ICommand FetchCommand { get; }
+    private ICommand ConfigCommand { get; }
     
-    protected MuninNode(
+    public MuninNode(
         ILogger<MuninNode> logger,
+        MuninNodeConfiguration config,
         IPluginProvider pluginProvider,
         IAccessRule accessRule,
         ISocketCreator socketServer, 
-        string hostName, 
-        Socket server, 
-        ICommand listCommand)
+        ListCommand listCommand, 
+        HelpCommand helpCommand, 
+        VersionCommand versionCommand, 
+        CapCommand capCommand, 
+        NodeCommand nodeCommand, 
+        FetchCommand fetchCommand, 
+        ConfigCommand configCommand)
     {
         PluginProvider = pluginProvider;
         AccessRule = accessRule;
         SocketServer = socketServer;
-        HostName = hostName;
-        Server = server;
         ListCommand = listCommand;
+        HelpCommand = helpCommand;
+        VersionCommand = versionCommand;
+        CapCommand = capCommand;
+        NodeCommand = nodeCommand;
+        FetchCommand = fetchCommand;
+        ConfigCommand = configCommand;
+        Config = config;
         Logger = logger;
     }
 
@@ -86,7 +91,7 @@ async
     {
         try
         {
-            if (Server.Connected)
+            if (Server?.Connected ?? false)
             {
 #if SYSTEM_NET_SOCKETS_SOCKET_DISCONNECTASYNC_REUSESOCKET_CANCELLATIONTOKEN
 await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
@@ -115,7 +120,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 
         try
         {
-            if (Server.Connected)
+            if (Server?.Connected ?? false)
                 Server.Disconnect(reuseSocket: false);
         }
         catch (SocketException)
@@ -123,8 +128,8 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 // swallow
         }
 
-        Server.Close();
-        Server.Dispose();
+        Server?.Close();
+        Server?.Dispose();
     }
 
     protected void ThrowIfPluginProviderIsNull()
@@ -197,7 +202,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
 
         Logger.LogInformation("accepting...");
 
-        var client = await Server
+        var client = await Server!
 #if SYSTEM_NET_SOCKETS_SOCKET_ACCEPTASYNC_CANCELLATIONTOKEN
 .AcceptAsync(cancellationToken: cancellationToken)
 #else
@@ -223,7 +228,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                 return;
             }
 
-            if (AccessRule is not null && !AccessRule.IsAcceptable(remoteEndPoint))
+            if (!AccessRule.IsAcceptable(remoteEndPoint))
             {
                 Logger.LogWarning("access refused: {RemoteEndPoint}", remoteEndPoint);
                 return;
@@ -240,7 +245,7 @@ await server.DisconnectAsync(reuseSocket: false).ConfigureAwait(false);
                 await SendResponseAsync(
                     client,
                     Encoding,
-                    $"# munin node at {HostName}",
+                    $"# munin node at {Config.Hostname}",
                     cancellationToken
                 ).ConfigureAwait(false);
             }
@@ -523,7 +528,7 @@ buffer = reader.UnreadSequence;
         if (!reader.IsNext(expectedCommand, advancePast: true))
             return false;
 
-        const byte SP = (byte)' ';
+        const byte space = (byte)' ';
 
         if (reader.Remaining == 0)
         {
@@ -531,7 +536,7 @@ buffer = reader.UnreadSequence;
             arguments = default;
             return true;
         }
-        else if (reader.IsNext(SP, advancePast: true))
+        else if (reader.IsNext(space, advancePast: true))
         {
 // <command> <SP> <arguments> <EOL>
 #if SYSTEM_BUFFERS_SEQUENCEREADER_UNREADSEQUENCE
@@ -547,29 +552,29 @@ arguments = reader.UnreadSequence;
 
     private static readonly byte CommandQuitShort = (byte)'.';
 
-    private ValueTask RespondToCommandAsync(
+    private async ValueTask RespondToCommandAsync(
         Socket client,
         ReadOnlySequence<byte> commandLine,
         CancellationToken cancellationToken
     )
     {
+
+        string[] result = [];
         if (ExpectCommand(commandLine, "fetch"u8, out var fetchArguments))
         {
-            return ProcessCommandFetchAsync(client, fetchArguments, cancellationToken);
+            result = await FetchCommand.ProcessAsync(fetchArguments, cancellationToken);
         }
-        else if (ExpectCommand(commandLine, "nodes"u8, out _))
+        else if (ExpectCommand(commandLine, "nodes"u8, out var nodeargs))
         {
-            return ProcessCommandNodesAsync(client, cancellationToken);
+            result = await NodeCommand.ProcessAsync(nodeargs, cancellationToken);
         }
-        else if (ExpectCommand(commandLine, "list"u8, out var args))
+        else if (ExpectCommand(commandLine, "list"u8, out var listargs))
         {
-            var restul = ListCommand.ProcessAsync(args);
-
-            return ProcessCommandListAsync(client, args, cancellationToken);
+            result = await ListCommand.ProcessAsync(listargs, cancellationToken);
         }
         else if (ExpectCommand(commandLine, "config"u8, out var configArguments))
         {
-            return ProcessCommandConfigAsync(client, configArguments, cancellationToken);
+            result = await ConfigCommand.ProcessAsync(configArguments, cancellationToken);
         }
         else if (
             ExpectCommand(commandLine, "quit"u8, out _) ||
@@ -580,37 +585,35 @@ arguments = reader.UnreadSequence;
 #if SYSTEM_THREADING_TASKS_VALUETASK_COMPLETEDTASK
 return ValueTask.CompletedTask;
 #else
-            return default;
+            return;
 #endif
         }
         else if (ExpectCommand(commandLine, "cap"u8, out var capArguments))
         {
-            return ProcessCommandCapAsync(client, capArguments, cancellationToken);
+            result = await CapCommand.ProcessAsync(capArguments, cancellationToken);
         }
-        else if (ExpectCommand(commandLine, "version"u8, out _))
+        else if (ExpectCommand(commandLine, "version"u8, out var versionargs))
         {
-            return ProcessCommandVersionAsync(client, cancellationToken);
+            result = await VersionCommand.ProcessAsync(versionargs, cancellationToken);
         }
         else
         {
-            return SendResponseAsync(
-                client,
-                Encoding,
-                "# Unknown command. Try cap, list, nodes, config, fetch, version or quit",
-                cancellationToken
-            );
+            result = await HelpCommand.ProcessAsync(ReadOnlySequence<byte>.Empty, cancellationToken);
         }
+        
+        await SendResponseAsync(
+            client: client,
+            encoding: Encoding,
+            responseLines: result,
+            cancellationToken: cancellationToken
+        );
+
     }
 
 #pragma warning disable IDE0230
     private static readonly ReadOnlyMemory<byte> EndOfLine = new[] { (byte)'\n' };
 #pragma warning restore IDE0230
 
-    private static readonly string[] ResponseLinesUnknownService =
-    [
-        "# Unknown service",
-        ".",
-    ];
 
     private static ValueTask SendResponseAsync(
         Socket client,
@@ -655,231 +658,7 @@ return ValueTask.CompletedTask;
         }
     }
 
-    private ValueTask ProcessCommandNodesAsync(
-        Socket client,
-        CancellationToken cancellationToken
-    )
-    {
-        return SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLines: new[]
-            {
-                HostName,
-                ".",
-            },
-            cancellationToken: cancellationToken
-        );
-    }
 
-    private ValueTask ProcessCommandVersionAsync(
-        Socket client,
-        CancellationToken cancellationToken
-    )
-    {
-        return SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLine: $"munins node on {HostName} version: {NodeVersion}",
-            cancellationToken: cancellationToken
-        );
-    }
-
-    private ValueTask ProcessCommandCapAsync(
-        Socket client,
-#pragma warning disable IDE0060
-        ReadOnlySequence<byte> arguments,
-#pragma warning restore IDE0060
-        CancellationToken cancellationToken
-    )
-    {
-// TODO: multigraph (https://guide.munin-monitoring.org/en/latest/plugin/protocol-multigraph.html)
-// TODO: dirtyconfig (https://guide.munin-monitoring.org/en/latest/plugin/protocol-dirtyconfig.html)
-// XXX: ignores capability arguments
-        return SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLine: "cap",
-            cancellationToken: cancellationToken
-        );
-    }
-
-    private ValueTask ProcessCommandListAsync(
-        Socket client,
-#pragma warning disable IDE0060
-        ReadOnlySequence<byte> arguments,
-#pragma warning restore IDE0060
-        CancellationToken cancellationToken
-    )
-    {
-        ThrowIfPluginProviderIsNull();
-
-// XXX: ignore [node] arguments
-        return SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLine: string.Join(" ", PluginProvider.Plugins.Select(static plugin => plugin.Name)),
-            cancellationToken: cancellationToken
-        );
-    }
-
-    private async ValueTask ProcessCommandFetchAsync(
-        Socket client,
-        ReadOnlySequence<byte> arguments,
-        CancellationToken cancellationToken
-    )
-    {
-        ThrowIfPluginProviderIsNull();
-
-        var plugin = PluginProvider.Plugins.FirstOrDefault(
-            plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
-        );
-
-        if (plugin == null)
-        {
-            await SendResponseAsync(
-                client,
-                Encoding,
-                ResponseLinesUnknownService,
-                cancellationToken
-            ).ConfigureAwait(false);
-
-            return;
-        }
-
-        var responseLines = new List<string>(capacity: plugin.DataSource.Fields.Count + 1);
-
-        foreach (var field in plugin.DataSource.Fields)
-        {
-            var valueString = await field.GetFormattedValueStringAsync(
-                cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
-
-            responseLines.Add($"{field.Name}.value {valueString}");
-        }
-
-        responseLines.Add(".");
-
-        await SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLines: responseLines,
-            cancellationToken: cancellationToken
-        ).ConfigureAwait(false);
-    }
-
-    private static string? TranslateFieldDrawAttribute(GraphStyle style)
-        => style switch
-        {
-            GraphStyle.Default => null,
-            GraphStyle.Area => "AREA",
-            GraphStyle.Stack => "STACK",
-            GraphStyle.AreaStack => "AREASTACK",
-            GraphStyle.Line => "LINE",
-            GraphStyle.LineWidth1 => "LINE1",
-            GraphStyle.LineWidth2 => "LINE2",
-            GraphStyle.LineWidth3 => "LINE3",
-            GraphStyle.LineStack => "LINESTACK",
-            GraphStyle.LineStackWidth1 => "LINE1STACK",
-            GraphStyle.LineStackWidth2 => "LINE2STACK",
-            GraphStyle.LineStackWidth3 => "LINE3STACK",
-            _ => throw new InvalidOperationException($"undefined draw attribute value: ({(int)style} {style})"),
-        };
-
-    private ValueTask ProcessCommandConfigAsync(
-        Socket client,
-        ReadOnlySequence<byte> arguments,
-        CancellationToken cancellationToken
-    )
-    {
-        ThrowIfPluginProviderIsNull();
-
-        var plugin = PluginProvider.Plugins.FirstOrDefault(
-            plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
-        );
-
-        if (plugin == null)
-        {
-            return SendResponseAsync(
-                client,
-                Encoding,
-                ResponseLinesUnknownService,
-                cancellationToken
-            );
-        }
-
-        var responseLines = new List<string>(capacity: 20);
-
-        responseLines.AddRange(
-            plugin.GraphAttributes.EnumerateAttributes()
-        );
-
-// The fields referenced by {fieldname}.negative must be defined ahread of others,
-// and thus lists the negative field settings first.
-// Otherwise, the following error occurs when generating the graph.
-// "[RRD ERROR] Unable to graph /var/cache/munin/www/XXX.png : undefined v name XXXXXXXXXXXXXX"
-        var orderedFields = plugin.DataSource.Fields.OrderBy(f => IsNegativeField(f, plugin.DataSource.Fields) ? 0 : 1);
-
-        foreach (var field in orderedFields)
-        {
-            var fieldAttrs = field.Attributes;
-            bool? graph = null;
-
-            responseLines.Add($"{field.Name}.label {fieldAttrs.Label}");
-
-            var draw = TranslateFieldDrawAttribute(fieldAttrs.GraphStyle);
-
-            if (draw is not null)
-                responseLines.Add($"{field.Name}.draw {draw}");
-
-            if (fieldAttrs.NormalRangeForWarning.HasValue)
-                AddFieldValueRange("warning", fieldAttrs.NormalRangeForWarning);
-
-            if (fieldAttrs.NormalRangeForCritical.HasValue)
-                AddFieldValueRange("critical", fieldAttrs.NormalRangeForCritical);
-
-            if (!string.IsNullOrEmpty(fieldAttrs.NegativeFieldName))
-            {
-                var negativeField = plugin.DataSource.Fields.FirstOrDefault(
-                    f => string.Equals(fieldAttrs.NegativeFieldName, f.Name, StringComparison.Ordinal)
-                );
-
-                if (negativeField is not null)
-                    responseLines.Add($"{field.Name}.negative {negativeField.Name}");
-            }
-
-// this field is defined as the negative field of other field, so should not be graphed
-            if (IsNegativeField(field, plugin.DataSource.Fields))
-                graph = false;
-
-            if (graph is bool drawGraph)
-                responseLines.Add($"{field.Name}.graph {(drawGraph ? "yes" : "no")}");
-
-            void AddFieldValueRange(string attr, PluginFieldNormalValueRange range)
-            {
-                if (range.Min.HasValue && range.Max.HasValue)
-                    responseLines.Add($"{field.Name}.{attr} {range.Min.Value}:{range.Max.Value}");
-                else if (range.Min.HasValue)
-                    responseLines.Add($"{field.Name}.{attr} {range.Min.Value}:");
-                else if (range.Max.HasValue)
-                    responseLines.Add($"{field.Name}.{attr} :{range.Max.Value}");
-            }
-        }
-
-        responseLines.Add(".");
-
-        return SendResponseAsync(
-            client: client,
-            encoding: Encoding,
-            responseLines: responseLines,
-            cancellationToken: cancellationToken
-        );
-
-        static bool IsNegativeField(IPluginField field, IReadOnlyCollection<IPluginField> fields)
-            => fields.Any(
-                f => string.Equals(field.Name, f.Attributes.NegativeFieldName, StringComparison.Ordinal)
-            );
-    }
 
     public async Task RunAsync(CancellationToken stoppingToken)
     {

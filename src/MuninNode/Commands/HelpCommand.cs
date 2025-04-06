@@ -1,14 +1,12 @@
 using System.Buffers;
-using System.Threading.Tasks;
-using MuninNode.Plugins;
 
 namespace MuninNode.Commands;
 
-public class ListCommand(IPluginProvider pluginProvider) : ICommand
+public class HelpCommand : ICommand
 {
     public Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
-        var result = string.Join(" ", pluginProvider.Plugins.Select(static plugin => plugin.Name));
+        var result = "# Unknown command. Try cap, list, nodes, config, fetch, version or quit";
         return Task.FromResult<string[]>([ result ]);
     }
 }

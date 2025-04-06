@@ -17,13 +17,13 @@ public class MuninNodeTest
 
         // Prepare
 
-        var services = new ServiceCollection();
-        services.AddMunin(
-            listen: "127.0.0.1",
-            port: 14949,
-            hostname: "localhost",
-            allowFrom: "127.0.0.1"
-        );
+        var services = new ServiceCollection()
+            .AddMunin(
+                listen: "127.0.0.1",
+                port: 14949,
+                hostname: "localhost",
+                allowFrom: "127.0.0.1"
+            );
 
         var provider = services.BuildServiceProvider();
         var muninNode = provider.GetRequiredService<IMuninNode>();

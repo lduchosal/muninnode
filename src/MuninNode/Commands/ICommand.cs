@@ -5,5 +5,5 @@ namespace MuninNode.Commands;
 
 public interface ICommand
 {
-    Task<string> ProcessAsync(ReadOnlySequence<byte> args);
+    Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken);
 }
