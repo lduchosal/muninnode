@@ -68,8 +68,8 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes
             scale: scale,
             arguments: arguments,
             updateRate: null,
-            width: null,
-            height: null,
+            width: 350,
+            height: 124,
             order: null,
             totalValueLabel: null
         )
@@ -83,42 +83,19 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes
         bool scale,
         string arguments,
         TimeSpan? updateRate,
-        int? width,
-        int? height,
+        int width,
+        int height,
         IEnumerable<string>? order,
         string? totalValueLabel
     )
     {
-        if (string.IsNullOrEmpty(title))
-        {
-            throw new ArgumentNullException(nameof(title));
-        }
-
-        if (string.IsNullOrEmpty(category))
-        {
-            throw new ArgumentNullException(nameof(category));
-        }
-
-        if (string.IsNullOrEmpty(arguments))
-        {
-            throw new ArgumentNullException(nameof(arguments));
-        }
-
-        if (string.IsNullOrEmpty(verticalLabel))
-        {
-            throw new ArgumentNullException(nameof(verticalLabel));
-        }
-
-        if (width is <= 0)
-        {
-            throw new ArgumentNullException(nameof(width));
-        }
-
-        if (height is <= 0)
-        {
-            throw new ArgumentNullException(nameof(height));
-        }
-
+        ArgumentException.ThrowIfNullOrEmpty(title, nameof(title));
+        ArgumentException.ThrowIfNullOrEmpty(category, nameof(category));
+        ArgumentException.ThrowIfNullOrEmpty(arguments, nameof(arguments));
+        ArgumentException.ThrowIfNullOrEmpty(verticalLabel, nameof(verticalLabel));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(width, 0, nameof(width));
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(height, 0, nameof(height));
+        
         Title = title;
         Category = category;
         Arguments = arguments;

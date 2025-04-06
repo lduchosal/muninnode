@@ -30,18 +30,6 @@ public static class AccessRuleServiceCollectionExtensions
         IAccessRule accessRule
     )
     {
-#pragma warning disable CA1510
-        if (services is null)
-        {
-            throw new ArgumentNullException(nameof(services));
-        }
-
-        if (accessRule is null)
-        {
-            throw new ArgumentNullException(nameof(accessRule));
-        }
-#pragma warning restore CA1510
-
         services.TryAdd(
             ServiceDescriptor.Singleton(typeof(IAccessRule), accessRule)
         );
