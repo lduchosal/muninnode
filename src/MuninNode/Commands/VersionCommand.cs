@@ -11,6 +11,6 @@ public class VersionCommand(MuninNodeConfiguration config) : ICommand
     public Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
         var result = $"munins node on {config.Hostname} version: {NodeVersion}";
-        return Task.FromResult<string[]>([ result ]);
+        return Task.FromResult<string[]>([result]);
     }
 }

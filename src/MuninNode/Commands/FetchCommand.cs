@@ -14,9 +14,9 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
         "# Unknown service",
         ".",
     ];
+
     public async Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
     {
-
         var plugin = pluginProvider.Plugins.FirstOrDefault(
             plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
         );
@@ -40,5 +40,4 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
         responseLines.Add(".");
         return responseLines.ToArray();
     }
-
 }

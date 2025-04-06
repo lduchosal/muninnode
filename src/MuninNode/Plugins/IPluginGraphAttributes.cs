@@ -9,10 +9,11 @@ namespace MuninNode.Plugins;
 /// Provides an interface that abstracts the plugin graph attributes, related to the drawing of a single graph.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#global-attributes">Plugin reference - Global attributes</seealso>
-public interface IPluginGraphAttributes {
-  /// <summary>
-  /// Enumerates plugin graph attributes defined by types that implement this interface.
-  /// </summary>
-  /// <returns><see cref="IEnumerable{String}"/> that enumerates graph attributes.</returns>
-  IEnumerable<string> EnumerateAttributes();
+public interface IPluginGraphAttributes
+{
+    /// <summary>
+    /// Enumerates plugin graph attributes defined by types that implement this interface.
+    /// </summary>
+    /// <returns><see cref="IEnumerable{String}"/> that enumerates graph attributes.</returns>
+    IEnumerable<string> EnumerateAttributes();
 }

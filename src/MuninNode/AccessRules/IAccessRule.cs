@@ -5,6 +5,7 @@ using System.Net;
 
 namespace MuninNode.AccessRules;
 
-public interface IAccessRule {
-  bool IsAcceptable(IPEndPoint remoteEndPoint);
+public interface IAccessRule
+{
+    bool IsAcceptable(IPEndPoint remoteEndPoint);
 }

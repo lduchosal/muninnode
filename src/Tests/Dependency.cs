@@ -51,8 +51,8 @@ public static class Dependency
     }
 }
 
-public class EmptyPluginProvider : IPluginProvider
+public class EmptyPluginProvider(INodeSessionCallback sessionCallback) : IPluginProvider
 {
     public IReadOnlyCollection<IPlugin> Plugins { get; } = [];
-    public INodeSessionCallback? SessionCallback { get; }
+    public INodeSessionCallback SessionCallback { get; } = sessionCallback;
 }

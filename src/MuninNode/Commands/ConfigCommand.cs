@@ -9,14 +9,15 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
     public ReadOnlySpan<byte> Name => "config"u8;
 
     private Encoding Encoding => Encoding.Default;
+
     private static readonly string[] ResponseLinesUnknownService =
     [
         "# Unknown service",
         ".",
     ];
+
     public Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
     {
-
         var plugin = pluginProvider.Plugins.FirstOrDefault(
             plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
         );
@@ -108,9 +109,8 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             => fields.Any(
                 f => string.Equals(field.Name, f.Attributes.NegativeFieldName, StringComparison.Ordinal)
             );
-        
-        return Task.FromResult(responseLines.ToArray());
 
+        return Task.FromResult(responseLines.ToArray());
     }
 
 
@@ -131,5 +131,4 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             GraphStyle.LineStackWidth3 => "LINE3STACK",
             _ => throw new InvalidOperationException($"undefined draw attribute value: ({(int)style} {style})"),
         };
-
 }

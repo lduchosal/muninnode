@@ -1,3 +1,5 @@
 namespace MuninNode.Commands;
 
-public interface IDefaultCommand : ICommand {}
+public interface IDefaultCommand : ICommand
+{
+}
