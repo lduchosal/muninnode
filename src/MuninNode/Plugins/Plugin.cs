@@ -3,27 +3,27 @@
 
 namespace MuninNode.Plugins;
 
-public class Plugin : IPlugin, IPluginDataSource, INodeSessionCallback
+public class Plugin : IPlugin, IDataSource, INodeSessionCallback
 {
     public string Name { get; }
 
-    public PluginGraphAttributes GraphAttributes { get; }
-    public IReadOnlyCollection<IPluginField> Fields { get; }
+    public GraphAttributes GraphAttributes { get; }
+    public IReadOnlyCollection<IField> Fields { get; }
 
 #pragma warning disable CA1033
-    IPluginGraphAttributes IPlugin.GraphAttributes => GraphAttributes;
+    IGraphAttributes IPlugin.GraphAttributes => GraphAttributes;
 
-    IPluginDataSource IPlugin.DataSource => this;
+    IDataSource IPlugin.DataSource => this;
 
-    IReadOnlyCollection<IPluginField> IPluginDataSource.Fields => Fields;
+    IReadOnlyCollection<IField> IDataSource.Fields => Fields;
 
     INodeSessionCallback IPlugin.SessionCallback => this;
 #pragma warning restore CA1033
 
     public Plugin(
         string name,
-        PluginGraphAttributes graphAttributes,
-        IReadOnlyCollection<IPluginField> fields
+        GraphAttributes graphAttributes,
+        IReadOnlyCollection<IField> fields
     )
     {
         if (string.IsNullOrEmpty(name))

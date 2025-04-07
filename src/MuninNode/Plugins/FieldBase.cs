@@ -6,17 +6,17 @@ using System.Text.RegularExpressions;
 
 namespace MuninNode.Plugins;
 
-public abstract class PluginFieldBase : IPluginField
+public abstract class FieldBase : IField
 {
     public string Name { get; }
     public string Label { get; }
     public GraphStyle GraphStyle { get; }
-    public PluginFieldNormalValueRange NormalRangeForWarning { get; }
-    public PluginFieldNormalValueRange NormalRangeForCritical { get; }
+    public FieldNormalValueRange NormalRangeForWarning { get; }
+    public FieldNormalValueRange NormalRangeForCritical { get; }
     public string? NegativeFieldName { get; }
 
 #pragma warning disable CA1033
-    PluginFieldAttributes IPluginField.Attributes => new(
+    FieldAttributes IField.Attributes => new(
         label: Label,
         graphStyle: GraphStyle,
         normalRangeForWarning: NormalRangeForWarning,
@@ -25,12 +25,12 @@ public abstract class PluginFieldBase : IPluginField
     );
 #pragma warning restore CA1033
 
-    protected PluginFieldBase(
+    protected FieldBase(
         string label,
         string? name,
         GraphStyle graphStyle = default,
-        PluginFieldNormalValueRange normalRangeForWarning = default,
-        PluginFieldNormalValueRange normalRangeForCritical = default
+        FieldNormalValueRange normalRangeForWarning = default,
+        FieldNormalValueRange normalRangeForCritical = default
     )
         : this(
             label: label,
@@ -43,12 +43,12 @@ public abstract class PluginFieldBase : IPluginField
     {
     }
 
-    protected PluginFieldBase(
+    protected FieldBase(
         string label,
         string? name,
         GraphStyle graphStyle,
-        PluginFieldNormalValueRange normalRangeForWarning,
-        PluginFieldNormalValueRange normalRangeForCritical,
+        FieldNormalValueRange normalRangeForWarning,
+        FieldNormalValueRange normalRangeForCritical,
         string? negativeFieldName
     )
     {
@@ -91,7 +91,7 @@ public abstract class PluginFieldBase : IPluginField
     protected abstract ValueTask<double?> FetchValueAsync(CancellationToken cancellationToken);
 
 #pragma warning disable CA1033
-    async ValueTask<string> IPluginField.GetFormattedValueStringAsync(CancellationToken cancellationToken)
+    async ValueTask<string> IField.GetFormattedValueStringAsync(CancellationToken cancellationToken)
     {
         const string unknownValueString = "U";
 

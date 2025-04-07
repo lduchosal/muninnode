@@ -7,43 +7,43 @@ namespace MuninNode.Plugins;
 partial class PluginFactory
 {
 #pragma warning restore IDE0040
-    public static IPluginField CreateField(
+    public static IField CreateField(
         string label,
         Func<double?> fetchValue
     )
-        => new ValueFromFuncPluginField(
+        => new ValueFromFuncField(
             label: label,
             name: null,
             graphStyle: GraphStyle.Default,
-            normalRangeForWarning: PluginFieldNormalValueRange.None,
-            normalRangeForCritical: PluginFieldNormalValueRange.None,
+            normalRangeForWarning: FieldNormalValueRange.None,
+            normalRangeForCritical: FieldNormalValueRange.None,
             negativeFieldName: null,
             fetchValue: fetchValue
         );
 
-    public static IPluginField CreateField(
+    public static IField CreateField(
         string label,
         GraphStyle graphStyle,
         Func<double?> fetchValue
     )
-        => new ValueFromFuncPluginField(
+        => new ValueFromFuncField(
             label: label,
             name: null,
             graphStyle: graphStyle,
-            normalRangeForWarning: PluginFieldNormalValueRange.None,
-            normalRangeForCritical: PluginFieldNormalValueRange.None,
+            normalRangeForWarning: FieldNormalValueRange.None,
+            normalRangeForCritical: FieldNormalValueRange.None,
             negativeFieldName: null,
             fetchValue: fetchValue
         );
 
-    public static IPluginField CreateField(
+    public static IField CreateField(
         string label,
         GraphStyle graphStyle,
-        PluginFieldNormalValueRange normalRangeForWarning,
-        PluginFieldNormalValueRange normalRangeForCritical,
+        FieldNormalValueRange normalRangeForWarning,
+        FieldNormalValueRange normalRangeForCritical,
         Func<double?> fetchValue
     )
-        => new ValueFromFuncPluginField(
+        => new ValueFromFuncField(
             label: label,
             name: null,
             graphStyle: graphStyle,
@@ -53,15 +53,15 @@ partial class PluginFactory
             fetchValue: fetchValue
         );
 
-    public static IPluginField CreateField(
+    public static IField CreateField(
         string name,
         string label,
         GraphStyle graphStyle,
-        PluginFieldNormalValueRange normalRangeForWarning,
-        PluginFieldNormalValueRange normalRangeForCritical,
+        FieldNormalValueRange normalRangeForWarning,
+        FieldNormalValueRange normalRangeForCritical,
         Func<double?> fetchValue
     )
-        => new ValueFromFuncPluginField(
+        => new ValueFromFuncField(
             label: label,
             name: name,
             graphStyle: graphStyle,
@@ -71,16 +71,16 @@ partial class PluginFactory
             fetchValue: fetchValue
         );
 
-    public static IPluginField CreateField(
+    public static IField CreateField(
         string name,
         string label,
         GraphStyle graphStyle,
-        PluginFieldNormalValueRange normalRangeForWarning,
-        PluginFieldNormalValueRange normalRangeForCritical,
+        FieldNormalValueRange normalRangeForWarning,
+        FieldNormalValueRange normalRangeForCritical,
         string? negativeFieldName,
         Func<double?> fetchValue
     )
-        => new ValueFromFuncPluginField(
+        => new ValueFromFuncField(
             label: label,
             name: name,
             graphStyle: graphStyle,
@@ -90,16 +90,16 @@ partial class PluginFactory
             fetchValue: fetchValue
         );
 
-    private sealed class ValueFromFuncPluginField : PluginFieldBase
+    private sealed class ValueFromFuncField : FieldBase
     {
         private readonly Func<double?> FetchValue;
 
-        public ValueFromFuncPluginField(
+        public ValueFromFuncField(
             string label,
             string? name,
             GraphStyle graphStyle,
-            PluginFieldNormalValueRange normalRangeForWarning,
-            PluginFieldNormalValueRange normalRangeForCritical,
+            FieldNormalValueRange normalRangeForWarning,
+            FieldNormalValueRange normalRangeForCritical,
             string? negativeFieldName,
             Func<double?> fetchValue
         )

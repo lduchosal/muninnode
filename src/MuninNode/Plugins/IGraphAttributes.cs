@@ -7,7 +7,7 @@ namespace MuninNode.Plugins;
 /// Provides an interface that abstracts the plugin graph attributes, related to the drawing of a single graph.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#global-attributes">Plugin reference - Global attributes</seealso>
-public interface IPluginGraphAttributes
+public interface IGraphAttributes
 {
     /// <summary>
     /// Enumerates plugin graph attributes defined by types that implement this interface.

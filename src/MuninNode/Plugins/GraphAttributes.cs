@@ -8,9 +8,9 @@ namespace MuninNode.Plugins;
 /// Defines graph attributes that should be returned when the plugin is called with the 'config' argument.
 /// This type represents the collection of 'field name attributes'.
 /// </summary>
-/// <seealso cref="IPluginGraphAttributes"/>
+/// <seealso cref="IGraphAttributes"/>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#global-attributes">Plugin reference - Global attributes</seealso>
-public sealed class PluginGraphAttributes : IPluginGraphAttributes
+public sealed class GraphAttributes : IGraphAttributes
 {
     /// <summary>Gets a value for the <c>graph_title</c>.</summary>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#graph-title">Plugin reference - Global attributes - graph_title</seealso>
@@ -54,7 +54,7 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#graph-total">Plugin reference - Global attributes - graph_total</seealso>
     public string? TotalValueLabel { get; }
 
-    public PluginGraphAttributes(
+    public GraphAttributes(
         string title,
         string category,
         string verticalLabel,
@@ -76,7 +76,7 @@ public sealed class PluginGraphAttributes : IPluginGraphAttributes
     {
     }
 
-    private PluginGraphAttributes(
+    private GraphAttributes(
         string title,
         string category,
         string verticalLabel,

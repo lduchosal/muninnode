@@ -12,7 +12,7 @@ partial class PluginFactory
         string name,
         string fieldLabel,
         Func<double?> fetchFieldValue,
-        PluginGraphAttributes graphAttributes
+        GraphAttributes graphAttributes
     )
         => CreatePlugin(
             name: name,
@@ -28,17 +28,17 @@ partial class PluginFactory
         string fieldLabel,
         GraphStyle fieldGraphStyle,
         Func<double?> fetchFieldValue,
-        PluginGraphAttributes graphAttributes
+        GraphAttributes graphAttributes
     )
         => CreatePlugin(
             name: name,
             graphAttributes: graphAttributes,
-            field: new ValueFromFuncPluginField(
+            field: new ValueFromFuncField(
                 label: fieldLabel,
                 name: null,
                 graphStyle: fieldGraphStyle,
-                normalRangeForWarning: PluginFieldNormalValueRange.None,
-                normalRangeForCritical: PluginFieldNormalValueRange.None,
+                normalRangeForWarning: FieldNormalValueRange.None,
+                normalRangeForCritical: FieldNormalValueRange.None,
                 negativeFieldName: null,
                 fetchValue: fetchFieldValue
             )
@@ -47,8 +47,8 @@ partial class PluginFactory
     /// <summary>Create a plugin which has one field.</summary>
     public static IPlugin CreatePlugin(
         string name,
-        PluginGraphAttributes graphAttributes,
-        PluginFieldBase field
+        GraphAttributes graphAttributes,
+        FieldBase field
     )
         => CreatePlugin(
             name: name,
@@ -59,8 +59,8 @@ partial class PluginFactory
     /// <summary>Create a plugin which has multiple fields.</summary>
     public static IPlugin CreatePlugin(
         string name,
-        PluginGraphAttributes graphAttributes,
-        IReadOnlyCollection<PluginFieldBase> fields
+        GraphAttributes graphAttributes,
+        IReadOnlyCollection<FieldBase> fields
     )
         => new Plugin(
             name: name,
@@ -71,8 +71,8 @@ partial class PluginFactory
     /// <summary>Create a plugin which has multiple fields.</summary>
     public static IPlugin CreatePlugin(
         string name,
-        PluginGraphAttributes graphAttributes,
-        IReadOnlyCollection<IPluginField> fields
+        GraphAttributes graphAttributes,
+        IReadOnlyCollection<IField> fields
     )
         => new Plugin(
             name: name,

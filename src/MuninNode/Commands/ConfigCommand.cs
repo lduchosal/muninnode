@@ -10,7 +10,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 
     private static Encoding Encoding => Encoding.Default;
 
-    private static readonly string[] ResponseLinesUnknownService =
+    private static readonly string[] UnknownService =
     [
         "# Unknown service",
         "."
@@ -23,7 +23,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
         );
         if (plugin == null)
         {
-            return Task.FromResult(ResponseLinesUnknownService);
+            return Task.FromResult(UnknownService);
         }
 
         var responseLines = new List<string>(capacity: 20);
@@ -32,10 +32,10 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             plugin.GraphAttributes.EnumerateAttributes()
         );
 
-// The fields referenced by {fieldname}.negative must be defined ahread of others,
-// and thus lists the negative field settings first.
-// Otherwise, the following error occurs when generating the graph.
-// "[RRD ERROR] Unable to graph /var/cache/munin/www/XXX.png : undefined v name XXXXXXXXXXXXXX"
+        // The fields referenced by {fieldname}.negative must be defined ahread of others,
+        // and thus lists the negative field settings first.
+        // Otherwise, the following error occurs when generating the graph.
+        // "[RRD ERROR] Unable to graph /var/cache/munin/www/XXX.png : undefined v name XXXXXXXXXXXXXX"
         var orderedFields = plugin.DataSource.Fields.OrderBy(f => IsNegativeField(f, plugin.DataSource.Fields) ? 0 : 1);
 
         foreach (var field in orderedFields)
@@ -85,7 +85,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
                 responseLines.Add($"{field.Name}.graph {(drawGraph ? "yes" : "no")}");
             }
             
-            void AddFieldValueRange(string attr, PluginFieldNormalValueRange range)
+            void AddFieldValueRange(string attr, FieldNormalValueRange range)
             {
                 if (range is { Min: not null, Max: not null })
                 {
@@ -105,7 +105,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
         responseLines.Add(".");
 
 
-        static bool IsNegativeField(IPluginField field, IReadOnlyCollection<IPluginField> fields)
+        static bool IsNegativeField(IField field, IReadOnlyCollection<IField> fields)
             => fields.Any(
                 f => string.Equals(field.Name, f.Attributes.NegativeFieldName, StringComparison.Ordinal)
             );

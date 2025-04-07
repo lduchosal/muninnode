@@ -9,7 +9,7 @@ namespace MuninNode.Plugins;
 /// This type represents the collection of 'field name attributes'.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#field-name-attributes">Plugin reference - Field name attributes</seealso>
-public readonly struct PluginFieldAttributes
+public readonly struct FieldAttributes
 {
     /// <summary>Gets a value for the <c>{fieldname}.label</c>.</summary>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-label">Plugin reference - Field name attributes - {fieldname}.label</seealso>
@@ -23,14 +23,14 @@ public readonly struct PluginFieldAttributes
     /// <summary>Gets a value for the <c>{fieldname}.warning</c>.</summary>
     /// <remarks>This property defines the upper limit, lower limit, or range of normal value, that is not treated as warning.</remarks>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-warning">Plugin reference - Field name attributes - {fieldname}.warning</seealso>
-    /// <seealso cref="PluginFieldNormalValueRange"/>
-    public PluginFieldNormalValueRange NormalRangeForWarning { get; }
+    /// <seealso cref="FieldNormalValueRange"/>
+    public FieldNormalValueRange NormalRangeForWarning { get; }
 
     /// <summary>Gets a value for the <c>{fieldname}.critical</c>.</summary>
     /// <remarks>This property defines the upper limit, lower limit, or range of normal value, that is not treated as critical.</remarks>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-critical">Plugin reference - Field name attributes - {fieldname}.critical</seealso>
-    /// <seealso cref="PluginFieldNormalValueRange"/>
-    public PluginFieldNormalValueRange NormalRangeForCritical { get; }
+    /// <seealso cref="FieldNormalValueRange"/>
+    public FieldNormalValueRange NormalRangeForCritical { get; }
 
     /// <summary>Gets a value for the <c>{fieldname}.negative</c>.</summary>
     /// <remarks>
@@ -41,7 +41,7 @@ public readonly struct PluginFieldAttributes
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/develop/plugins/plugin-bcp.html#plugin-bcp-direction">Best Current Practices for good plugin graphs - Direction</seealso>
     public string? NegativeFieldName { get; }
 
-    public PluginFieldAttributes(
+    public FieldAttributes(
         string label,
         GraphStyle graphStyle = GraphStyle.Default
     )
@@ -55,11 +55,11 @@ public readonly struct PluginFieldAttributes
     {
     }
 
-    public PluginFieldAttributes(
+    public FieldAttributes(
         string label,
         GraphStyle graphStyle = GraphStyle.Default,
-        PluginFieldNormalValueRange normalRangeForWarning = default,
-        PluginFieldNormalValueRange normalRangeForCritical = default
+        FieldNormalValueRange normalRangeForWarning = default,
+        FieldNormalValueRange normalRangeForCritical = default
     )
         : this(
             label: label,
@@ -71,11 +71,11 @@ public readonly struct PluginFieldAttributes
     {
     }
 
-    public PluginFieldAttributes(
+    public FieldAttributes(
         string label,
         GraphStyle graphStyle,
-        PluginFieldNormalValueRange normalRangeForWarning,
-        PluginFieldNormalValueRange normalRangeForCritical,
+        FieldNormalValueRange normalRangeForWarning,
+        FieldNormalValueRange normalRangeForCritical,
         string? negativeFieldName
     )
     {
