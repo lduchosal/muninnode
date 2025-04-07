@@ -8,7 +8,7 @@ public class HelpCommand : ICommand, IDefaultCommand
 
     public Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
-        const string result = "# Unknown command. Try cap, list, nodes, config, fetch, version or quit";
+        const string result = "# Unknown command. Try help, cap, list, nodes, config, fetch, version or quit";
         return Task.FromResult<string[]>([result]);
     }
 }
