@@ -13,11 +13,11 @@ public interface IPlugin : ISessionCallback
     /// <remarks>This value is used as the plugin name returned by the 'list' argument, or the plugin name specified by the 'fetch' argument.</remarks>
     string Name { get; }
 
-    /// <summary>Gets a collection of plugin fields (<see cref="IField"/>) provided by this data source.</summary>
-    /// <seealso cref="IField"/>
-    IReadOnlyCollection<IField> Fields { get; }
+    /// <summary>Gets a collection of plugin fields (<see cref="FieldBase"/>) provided by this data source.</summary>
+    /// <seealso cref="FieldBase"/>
+    IReadOnlyCollection<FieldBase> Fields { get; }
     
-    /// <summary>Gets a <see cref="IGraphAttributes"/> that represents the graph attributes when the field values (<see cref="IField"/>) are drawn as a graph.</summary>
+    /// <summary>Gets a <see cref="IGraphAttributes"/> that represents the graph attributes when the field values (<see cref="FieldBase"/>) are drawn as a graph.</summary>
     /// <seealso cref="IGraphAttributes"/>
     /// <seealso cref="Plugins.GraphAttributes"/>
     IGraphAttributes GraphAttributes { get; }

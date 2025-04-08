@@ -4,7 +4,6 @@ using MuninNode;
 using MuninNode.AccessRules;
 using MuninNode.Commands;
 using MuninNode.Plugins;
-using MuninNode.SocketCreate;
 
 namespace Tests;
 
@@ -33,7 +32,6 @@ public static class Dependency
             .AddLogging()
 
             .AddScoped<IMuninNode, MuninNode.MuninNode>()
-            .AddScoped<ISocketCreator, SocketCreator>()
             .AddScoped<IPluginProvider, EmptyPluginProvider>()
             .AddScoped<IAccessRule, AccessRuleFromConfig>()
             .AddScoped<MuninNodeConfiguration>(_ => configuration.BuildMuninNodeConfig())

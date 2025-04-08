@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <SignAssembly>true</SignAssembly>
         <AssemblyOriginatorKeyFile>muninnode.snk</AssemblyOriginatorKeyFile>
-        <LangVersion>default</LangVersion>
+        <LangVersion>preview</LangVersion>
         <RootNamespace>MuninNode</RootNamespace>
     </PropertyGroup>
 

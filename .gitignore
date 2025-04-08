@@ -3,3 +3,5 @@ src/MuninNode/bin/
 src/MuninNode/obj/
 src/Tests/bin/
 src/Tests/obj/
+src/Plugins/bin/
+src/Plugins/obj/

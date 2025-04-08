@@ -11,7 +11,6 @@ using Microsoft.Extensions.Logging;
 using MuninNode.AccessRules;
 using MuninNode.Commands;
 using MuninNode.Plugins;
-using MuninNode.SocketCreate;
 
 namespace MuninNode;
 
@@ -24,7 +23,6 @@ public class MuninNode(
     MuninNodeConfiguration config,
     IPluginProvider pluginProvider,
     IAccessRule accessRule,
-    ISocketCreator socketServer,
     IEnumerable<ICommand> commands,
     IDefaultCommand help)
     : IMuninNode, IDisposable, IAsyncDisposable
@@ -166,9 +164,7 @@ public class MuninNode(
                 await SendResponseAsync(
                     client,
                     Encoding,
-                    [$"# munin node at {config.Hostname}"],
-                    cancellationToken
-                ).ConfigureAwait(false);
+                    cancellationToken, [$"# munin node at {config.Hostname}"]).ConfigureAwait(false);
             }
             catch (SocketException ex) when (
                 ex.SocketErrorCode is
@@ -365,8 +361,8 @@ public class MuninNode(
                 {
                     await RespondToCommandAsync(
                         client: socket,
-                        commandLine: line,
-                        cancellationToken: cancellationToken
+                        cancellationToken: cancellationToken,
+                        commandLine: line
                     ).ConfigureAwait(false);
                 }
             }
@@ -436,17 +432,14 @@ public class MuninNode(
         await SendResponseAsync(
             client: client,
             encoding: Encoding,
-            responseLines: result,
-            cancellationToken: cancellationToken
-        );
+            cancellationToken: cancellationToken, 
+            responseLines: result);
     }
     
-    private static async ValueTask SendResponseAsync(
-        Socket client,
+    private static async ValueTask SendResponseAsync(Socket client,
         Encoding encoding,
-        IEnumerable<string> responseLines,
-        CancellationToken cancellationToken
-    )
+        CancellationToken cancellationToken,
+        params string[] responseLines)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -467,11 +460,45 @@ public class MuninNode(
             ).ConfigureAwait(false);
         }
     }
+    private Socket CreateServerSocket()
+    {
+        const int MaxClients = 1;
+        Socket? server = null;
 
+        try
+        {
+            var endPoint = new IPEndPoint(
+                address: config.Listen,
+                port: config.Port
+            );
+
+            server = new Socket(
+                endPoint.AddressFamily,
+                SocketType.Stream,
+                ProtocolType.Tcp
+            );
+
+            if (endPoint.AddressFamily == AddressFamily.InterNetworkV6 && Socket.OSSupportsIPv4)
+            {
+                server.DualMode = true;
+            }
+
+            server.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
+            server.Bind(endPoint);
+            server.Listen(MaxClients);
+
+            return server;
+        }
+        catch
+        {
+            server?.Dispose();
+            throw;
+        }
+    }
     public async Task RunAsync(CancellationToken stoppingToken)
     {
         logger.LogInformation($"starting");
-        Server = socketServer.CreateServerSocket() ?? throw new InvalidOperationException("cannot start server");
+        Server = CreateServerSocket() ?? throw new InvalidOperationException("cannot start server");
         logger.LogInformation("started (end point: {LocalEndPoint})", Server.LocalEndPoint);
         await AcceptAsync(false, stoppingToken);
     }

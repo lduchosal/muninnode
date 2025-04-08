@@ -7,36 +7,27 @@ public class Plugin : IPlugin, ISessionCallback
 {
     public string Name { get; }
     public GraphAttributes GraphAttributes { get; }
-    public IReadOnlyCollection<IField> Fields { get; }
+    public IReadOnlyCollection<FieldBase> Fields { get; }
 
     IGraphAttributes IPlugin.GraphAttributes => GraphAttributes;
-    IReadOnlyCollection<IField> IPlugin.Fields => Fields;
+    IReadOnlyCollection<FieldBase> IPlugin.Fields => Fields;
 
     public Plugin(
         string name,
         GraphAttributes graphAttributes,
-        IReadOnlyCollection<IField> fields
+        IReadOnlyCollection<FieldBase> fields
     )
     {
-        if (string.IsNullOrEmpty(name))
-        {
-            throw new ArgumentNullException(nameof(name));
-        }
+        ArgumentException.ThrowIfNullOrEmpty(name, nameof(name));
 
         Name = name;
-        GraphAttributes = graphAttributes ?? throw new ArgumentNullException(nameof(graphAttributes));
-        Fields = fields ?? throw new ArgumentNullException(nameof(fields));
+        GraphAttributes = graphAttributes;
+        Fields = fields;
     }
 
     Task ISessionCallback.ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
-        => ReportSessionStartedAsync(sessionId, cancellationToken);
-
-    protected virtual Task ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
-        => Task.CompletedTask; // do nothing in this class
+        => Task.CompletedTask;
 
     Task ISessionCallback.ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
-        => ReportSessionClosedAsync(sessionId, cancellationToken);
-
-    protected virtual Task ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
-        => Task.CompletedTask; // do nothing in this class
+        => Task.CompletedTask;
 }

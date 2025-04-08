@@ -8,7 +8,6 @@ namespace MuninNode.Plugins;
 /// </summary>
 public interface ISessionCallback
 {
-    
     /// <summary>
     /// Implements a callback to be called when <c>munin-update</c> starts a session.
     /// </summary>

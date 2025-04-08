@@ -40,32 +40,31 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 
         foreach (var field in orderedFields)
         {
-            var fieldAttrs = field.Attributes;
             bool? graph = null;
 
-            responseLines.Add($"{field.Name}.label {fieldAttrs.Label}");
+            responseLines.Add($"{field.Name}.label {field.Label}");
 
-            var draw = TranslateFieldDrawAttribute(fieldAttrs.GraphStyle);
+            var draw = TranslateFieldDrawAttribute(field.GraphStyle);
 
             if (draw is not null)
             {
                 responseLines.Add($"{field.Name}.draw {draw}");
             }
 
-            if (fieldAttrs.NormalRangeForWarning.HasValue)
+            if (field.WarningRange.HasValue)
             {
-                AddFieldValueRange("warning", fieldAttrs.NormalRangeForWarning);
+                AddFieldValueRange("warning", field.WarningRange);
             }
 
-            if (fieldAttrs.NormalRangeForCritical.HasValue)
+            if (field.CriticalRange.HasValue)
             {
-                AddFieldValueRange("critical", fieldAttrs.NormalRangeForCritical);
+                AddFieldValueRange("critical", field.CriticalRange);
             }
 
-            if (!string.IsNullOrEmpty(fieldAttrs.NegativeFieldName))
+            if (!string.IsNullOrEmpty(field.NegativeFieldName))
             {
                 var negativeField = plugin.Fields.FirstOrDefault(
-                    f => string.Equals(fieldAttrs.NegativeFieldName, f.Name, StringComparison.Ordinal)
+                    f => string.Equals(field.NegativeFieldName, f.Name, StringComparison.Ordinal)
                 );
 
                 if (negativeField is not null)
@@ -105,9 +104,9 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
         responseLines.Add(".");
 
 
-        static bool IsNegativeField(IField field, IReadOnlyCollection<IField> fields)
+        static bool IsNegativeField(FieldBase field, IReadOnlyCollection<FieldBase> fields)
             => fields.Any(
-                f => string.Equals(field.Name, f.Attributes.NegativeFieldName, StringComparison.Ordinal)
+                f => string.Equals(field.Name, f.NegativeFieldName, StringComparison.Ordinal)
             );
 
         return Task.FromResult(responseLines.ToArray());
