@@ -35,10 +35,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\MuninNode\MuninNode.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Plugins\" />
+      <ProjectReference Include="..\Plugins\Plugins.csproj" />
     </ItemGroup>
 
 </Project>

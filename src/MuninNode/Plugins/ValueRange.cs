@@ -12,7 +12,7 @@ namespace MuninNode.Plugins;
 /// </remarks>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-critical">Plugin reference - Field name attributes - {fieldname}.critical</seealso>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-warning">Plugin reference - Field name attributes - {fieldname}.warning</seealso>
-public readonly struct FieldNormalValueRange
+public readonly struct ValueRange
 {
     private static double ValidateValue(double val, string paramName)
     {
@@ -54,15 +54,15 @@ public readonly struct FieldNormalValueRange
     }
 
 // min:
-    public static FieldNormalValueRange CreateMin(double min)
+    public static ValueRange CreateMin(double min)
         => new(min: ValidateValue(min, nameof(min)), max: null);
 
 // :max
-    public static FieldNormalValueRange CreateMax(double max)
+    public static ValueRange CreateMax(double max)
         => new(min: null, max: ValidateValue(max, nameof(max)));
 
 // min:max
-    public static FieldNormalValueRange CreateRange(double min, double max)
+    public static ValueRange CreateRange(double min, double max)
         => new(
             range: ValidateRange(
                 min: ValidateValue(min, nameof(min)),
@@ -72,19 +72,19 @@ public readonly struct FieldNormalValueRange
             )
         );
 
-    public static readonly FieldNormalValueRange None = new(null, null);
+    public static readonly ValueRange None = new(null, null);
 
     public double? Min { get; }
     public double? Max { get; }
     public bool HasValue => Min.HasValue || Max.HasValue;
 
-    private FieldNormalValueRange(double? min, double? max)
+    private ValueRange(double? min, double? max)
     {
         Min = min;
         Max = max;
     }
 
-    private FieldNormalValueRange((double? Min, double? Max) range)
+    private ValueRange((double? Min, double? Max) range)
     {
         Min = range.Min;
         Max = range.Max;

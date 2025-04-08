@@ -55,18 +55,7 @@ public static class Dependency
 public class EmptyPluginProvider : IPluginProvider
 {
     public IReadOnlyCollection<IPlugin> Plugins { get; } = [];
-    public INodeSessionCallback SessionCallback { get; } = new NodeSessionCallback();
-}
+    public Task ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken) => Task.CompletedTask;
+    public Task ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken) => Task.CompletedTask;
 
-public class NodeSessionCallback : INodeSessionCallback
-{
-    public ValueTask ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
-
-    public ValueTask ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
-    {
-        throw new NotImplementedException();
-    }
 }

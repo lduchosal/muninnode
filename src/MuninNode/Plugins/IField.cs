@@ -26,5 +26,5 @@ public interface IField
     /// Returns a field's numeric value in its string representation.
     /// By returning <c>"U"</c> instead of numeric value, the field can also be reported as having a value of 'UNKNOWN'.
     /// </returns>
-    ValueTask<string> GetFormattedValueStringAsync(CancellationToken cancellationToken);
+    Task<string> GetFormattedValueStringAsync(CancellationToken cancellationToken);
 }

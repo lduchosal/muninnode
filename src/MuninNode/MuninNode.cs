@@ -201,14 +201,14 @@ public class MuninNode(
 
             try
             {
-                await pluginProvider.SessionCallback
+                await pluginProvider
                     .ReportSessionStartedAsync(sessionId, cancellationToken)
                     .ConfigureAwait(false)
                     ;
 
                 foreach (var plugin in pluginProvider.Plugins)
                 {
-                    await plugin.SessionCallback
+                    await plugin
                         .ReportSessionStartedAsync(sessionId, cancellationToken)
                         .ConfigureAwait(false)
                         ;
@@ -228,13 +228,13 @@ public class MuninNode(
             {
                 foreach (var plugin in pluginProvider.Plugins)
                 {
-                    await plugin.SessionCallback
+                    await plugin
                         .ReportSessionClosedAsync(sessionId, cancellationToken)
                         .ConfigureAwait(false)
                         ;
                 }
 
-                await pluginProvider.SessionCallback
+                await pluginProvider
                     .ReportSessionClosedAsync(sessionId, cancellationToken)
                     .ConfigureAwait(false)
                     ;
@@ -297,7 +297,7 @@ public class MuninNode(
             )
             {
                 logger.LogInformation(
-                    "[{RemoteEndPoint}] expected socket exception ({NumericSocketErrorCode} {SocketErrorCode})",
+                    "[{RemoteEndPoint}] expected socket error ({NumericSocketErrorCode} {SocketErrorCode})",
                     remoteEndPoint,
                     (int)ex.SocketErrorCode,
                     ex.SocketErrorCode

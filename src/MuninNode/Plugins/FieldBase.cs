@@ -11,8 +11,8 @@ public abstract class FieldBase : IField
     public string Name { get; }
     public string Label { get; }
     public GraphStyle GraphStyle { get; }
-    public FieldNormalValueRange NormalRangeForWarning { get; }
-    public FieldNormalValueRange NormalRangeForCritical { get; }
+    public ValueRange NormalRangeForWarning { get; }
+    public ValueRange NormalRangeForCritical { get; }
     public string? NegativeFieldName { get; }
 
 #pragma warning disable CA1033
@@ -29,8 +29,8 @@ public abstract class FieldBase : IField
         string label,
         string? name,
         GraphStyle graphStyle = default,
-        FieldNormalValueRange normalRangeForWarning = default,
-        FieldNormalValueRange normalRangeForCritical = default
+        ValueRange normalRangeForWarning = default,
+        ValueRange normalRangeForCritical = default
     )
         : this(
             label: label,
@@ -47,8 +47,8 @@ public abstract class FieldBase : IField
         string label,
         string? name,
         GraphStyle graphStyle,
-        FieldNormalValueRange normalRangeForWarning,
-        FieldNormalValueRange normalRangeForCritical,
+        ValueRange normalRangeForWarning,
+        ValueRange normalRangeForCritical,
         string? negativeFieldName
     )
     {
@@ -91,12 +91,10 @@ public abstract class FieldBase : IField
     protected abstract ValueTask<double?> FetchValueAsync(CancellationToken cancellationToken);
 
 #pragma warning disable CA1033
-    async ValueTask<string> IField.GetFormattedValueStringAsync(CancellationToken cancellationToken)
+    async Task<string> IField.GetFormattedValueStringAsync(CancellationToken cancellationToken)
     {
         const string unknownValueString = "U";
-
         var value = await FetchValueAsync(cancellationToken).ConfigureAwait(false);
-
         return value?.ToString(provider: CultureInfo.InvariantCulture) ?? unknownValueString;
     }
 #pragma warning restore CA1033

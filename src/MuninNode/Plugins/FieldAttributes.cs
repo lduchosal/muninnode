@@ -23,14 +23,14 @@ public readonly struct FieldAttributes
     /// <summary>Gets a value for the <c>{fieldname}.warning</c>.</summary>
     /// <remarks>This property defines the upper limit, lower limit, or range of normal value, that is not treated as warning.</remarks>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-warning">Plugin reference - Field name attributes - {fieldname}.warning</seealso>
-    /// <seealso cref="FieldNormalValueRange"/>
-    public FieldNormalValueRange NormalRangeForWarning { get; }
+    /// <seealso cref="ValueRange"/>
+    public ValueRange NormalRangeForWarning { get; }
 
     /// <summary>Gets a value for the <c>{fieldname}.critical</c>.</summary>
     /// <remarks>This property defines the upper limit, lower limit, or range of normal value, that is not treated as critical.</remarks>
     /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-critical">Plugin reference - Field name attributes - {fieldname}.critical</seealso>
-    /// <seealso cref="FieldNormalValueRange"/>
-    public FieldNormalValueRange NormalRangeForCritical { get; }
+    /// <seealso cref="ValueRange"/>
+    public ValueRange NormalRangeForCritical { get; }
 
     /// <summary>Gets a value for the <c>{fieldname}.negative</c>.</summary>
     /// <remarks>
@@ -58,8 +58,8 @@ public readonly struct FieldAttributes
     public FieldAttributes(
         string label,
         GraphStyle graphStyle = GraphStyle.Default,
-        FieldNormalValueRange normalRangeForWarning = default,
-        FieldNormalValueRange normalRangeForCritical = default
+        ValueRange normalRangeForWarning = default,
+        ValueRange normalRangeForCritical = default
     )
         : this(
             label: label,
@@ -74,8 +74,8 @@ public readonly struct FieldAttributes
     public FieldAttributes(
         string label,
         GraphStyle graphStyle,
-        FieldNormalValueRange normalRangeForWarning,
-        FieldNormalValueRange normalRangeForCritical,
+        ValueRange normalRangeForWarning,
+        ValueRange normalRangeForCritical,
         string? negativeFieldName
     )
     {

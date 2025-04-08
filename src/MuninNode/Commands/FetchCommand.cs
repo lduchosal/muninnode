@@ -26,9 +26,9 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
             return ResponseLinesUnknownService;
         }
 
-        var responseLines = new List<string>(capacity: plugin.DataSource.Fields.Count + 1);
+        var responseLines = new List<string>(capacity: plugin.Fields.Count + 1);
 
-        foreach (var field in plugin.DataSource.Fields)
+        foreach (var field in plugin.Fields)
         {
             var valueString = await field.GetFormattedValueStringAsync(
                 cancellationToken: cancellationToken

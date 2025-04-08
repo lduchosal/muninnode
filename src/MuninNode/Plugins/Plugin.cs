@@ -3,22 +3,14 @@
 
 namespace MuninNode.Plugins;
 
-public class Plugin : IPlugin, IDataSource, INodeSessionCallback
+public class Plugin : IPlugin, ISessionCallback
 {
     public string Name { get; }
-
     public GraphAttributes GraphAttributes { get; }
     public IReadOnlyCollection<IField> Fields { get; }
 
-#pragma warning disable CA1033
     IGraphAttributes IPlugin.GraphAttributes => GraphAttributes;
-
-    IDataSource IPlugin.DataSource => this;
-
-    IReadOnlyCollection<IField> IDataSource.Fields => Fields;
-
-    INodeSessionCallback IPlugin.SessionCallback => this;
-#pragma warning restore CA1033
+    IReadOnlyCollection<IField> IPlugin.Fields => Fields;
 
     public Plugin(
         string name,
@@ -36,15 +28,15 @@ public class Plugin : IPlugin, IDataSource, INodeSessionCallback
         Fields = fields ?? throw new ArgumentNullException(nameof(fields));
     }
 
-    ValueTask INodeSessionCallback.ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
+    Task ISessionCallback.ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
         => ReportSessionStartedAsync(sessionId, cancellationToken);
 
-    protected virtual ValueTask ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
-        => default; // do nothing in this class
+    protected virtual Task ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken)
+        => Task.CompletedTask; // do nothing in this class
 
-    ValueTask INodeSessionCallback.ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
+    Task ISessionCallback.ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
         => ReportSessionClosedAsync(sessionId, cancellationToken);
 
-    protected virtual ValueTask ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
-        => default; // do nothing in this class
+    protected virtual Task ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken)
+        => Task.CompletedTask; // do nothing in this class
 }

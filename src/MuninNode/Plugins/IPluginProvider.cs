@@ -6,7 +6,7 @@ namespace MuninNode.Plugins;
 /// <summary>
 /// Provides an interface that abstracts the plugin provider.
 /// </summary>
-public interface IPluginProvider
+public interface IPluginProvider : ISessionCallback
 {
     /// <summary>Gets a readonly collection of <see cref="IPlugin"/> provided by this provider.</summary>
     /// <remarks>
@@ -16,9 +16,4 @@ public interface IPluginProvider
     /// <seealso cref="IPlugin"/>
     /// <seealso cref="MuninNode"/>
     IReadOnlyCollection<IPlugin> Plugins { get; }
-
-    /// <summary>Gets a <see cref="INodeSessionCallback"/>, which defines the callbacks when a request session from the <c>munin-update</c> starts or ends, such as fetching data or getting configurations.</summary>
-    /// <seealso cref="INodeSessionCallback"/>
-    /// <seealso cref="MuninNode"/>
-    INodeSessionCallback SessionCallback { get; }
 }

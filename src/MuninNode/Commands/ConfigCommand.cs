@@ -36,7 +36,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
         // and thus lists the negative field settings first.
         // Otherwise, the following error occurs when generating the graph.
         // "[RRD ERROR] Unable to graph /var/cache/munin/www/XXX.png : undefined v name XXXXXXXXXXXXXX"
-        var orderedFields = plugin.DataSource.Fields.OrderBy(f => IsNegativeField(f, plugin.DataSource.Fields) ? 0 : 1);
+        var orderedFields = plugin.Fields.OrderBy(f => IsNegativeField(f, plugin.Fields) ? 0 : 1);
 
         foreach (var field in orderedFields)
         {
@@ -64,7 +64,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 
             if (!string.IsNullOrEmpty(fieldAttrs.NegativeFieldName))
             {
-                var negativeField = plugin.DataSource.Fields.FirstOrDefault(
+                var negativeField = plugin.Fields.FirstOrDefault(
                     f => string.Equals(fieldAttrs.NegativeFieldName, f.Name, StringComparison.Ordinal)
                 );
 
@@ -75,7 +75,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
             }
 
 // this field is defined as the negative field of other field, so should not be graphed
-            if (IsNegativeField(field, plugin.DataSource.Fields))
+            if (IsNegativeField(field, plugin.Fields))
             {
                 graph = false;
             }
@@ -85,7 +85,7 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
                 responseLines.Add($"{field.Name}.graph {(drawGraph ? "yes" : "no")}");
             }
             
-            void AddFieldValueRange(string attr, FieldNormalValueRange range)
+            void AddFieldValueRange(string attr, ValueRange range)
             {
                 if (range is { Min: not null, Max: not null })
                 {

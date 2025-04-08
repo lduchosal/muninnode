@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2023 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 
+using System.ComponentModel;
+
 namespace MuninNode.Plugins;
 
 /// <summary>
@@ -9,19 +11,19 @@ namespace MuninNode.Plugins;
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/reference/plugin.html#fieldname-draw">Plugin reference - Field name attributes - {fieldname}.draw</seealso>
 public enum GraphStyle
 {
-    Default = default,
+    [Description("")] Default = default,
 
-    Area = 1,
-    Stack = 2,
-    AreaStack = 3,
+    [Description("AREA")] Area = 1,
+    [Description("STACK")] Stack = 2,
+    [Description("AREASTACK")] AreaStack = 3,
 
-    Line = 100,
-    LineWidth1 = 101,
-    LineWidth2 = 102,
-    LineWidth3 = 103,
+    [Description("LINE")] Line = 100,
+    [Description("LINE1")] LineWidth1 = 101,
+    [Description("LINE2")] LineWidth2 = 102,
+    [Description("LINE3")] LineWidth3 = 103,
 
-    LineStack = 200,
-    LineStackWidth1 = 201,
-    LineStackWidth2 = 202,
-    LineStackWidth3 = 203
+    [Description("LINESTACK")] LineStack = 200,
+    [Description("LINE1STACK")] LineStackWidth1 = 201,
+    [Description("LINE2STACK")] LineStackWidth2 = 202,
+    [Description("LINE3STACK")] LineStackWidth3 = 203
 }
