@@ -4,8 +4,6 @@ namespace MuninNode;
 
 public static class Sequence
 {
-    public static readonly ReadOnlyMemory<byte> EndOfLine = new[] { (byte)'\n' };
-
     public static bool TryReadLine(ref ReadOnlySequence<byte> buffer, out ReadOnlySequence<byte> line)
     {
         var reader = new SequenceReader<byte>(buffer);
@@ -53,7 +51,8 @@ public static class Sequence
             arguments = default;
             return true;
         }
-        else if (reader.IsNext(space, advancePast: true))
+        
+        if (reader.IsNext(space, advancePast: true))
         {
             // <command> <SP> <arguments> <EOL>
 #if SYSTEM_BUFFERS_SEQUENCEREADER_UNREADSEQUENCE

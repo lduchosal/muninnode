@@ -12,18 +12,25 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
 
     private static readonly string[] UnknownService =
     [
-        "# Unknown service",
-        "."
     ];
 
-    public Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
+    public Task<HanldeResult> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
     {
         var plugin = pluginProvider.Plugins.FirstOrDefault(
             plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
         );
         if (plugin == null)
         {
-            return Task.FromResult(UnknownService);
+            var result = new HanldeResult
+            {
+                Lines = new List<string>
+                {
+                    "# Unknown service",
+                    "."
+                },
+                Status = Status.Continue
+            };
+            return Task.FromResult(result);
         }
 
         var responseLines = new List<string>(capacity: 20);
@@ -109,7 +116,12 @@ public class ConfigCommand(IPluginProvider pluginProvider) : ICommand
                 f => string.Equals(field.Name, f.NegativeFieldName, StringComparison.Ordinal)
             );
 
-        return Task.FromResult(responseLines.ToArray());
+        var result2 = new HanldeResult
+        {
+            Lines = responseLines,
+            Status = Status.Continue
+        };
+        return Task.FromResult(result2);
     }
 
 

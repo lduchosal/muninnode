@@ -22,9 +22,9 @@ public class ConfigCommandTest
         var result = await command.ProcessAsync(args, tokenSource.Token);
         
         // Assert
-        // Assert
-        Assert.AreEqual(2, result.Length);
-        Assert.IsTrue(result[0].Contains("# Unknown service"), result[0]);
-        Assert.IsTrue(result[1].Contains("."), result[1]);
+        Assert.AreEqual(Status.Continue, result.Status);
+        Assert.AreEqual(2, result.Lines.Count);
+        Assert.IsTrue(result.Lines[0].Contains("# Unknown service"), result.Lines[0]);
+        Assert.IsTrue(result.Lines[1].Contains("."), result.Lines[1]);
     }
 }

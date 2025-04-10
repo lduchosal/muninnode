@@ -6,12 +6,17 @@ public class NodeCommand(MuninNodeConfiguration config) : ICommand
 {
     public ReadOnlySpan<byte> Name => "nodes"u8;
 
-    public Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
+    public Task<HanldeResult> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
-        return Task.FromResult<string[]>(
-        [
-            config.Hostname,
-            "."
-        ]);
+        var result = new HanldeResult
+        {
+            Lines = [
+                config.Hostname,
+                "."
+            ],
+            Status = Status.Continue
+        };
+        return Task.FromResult(result);
+
     }
 }

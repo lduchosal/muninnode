@@ -31,11 +31,14 @@ public static class Dependency
         services
             .AddLogging()
 
-            .AddScoped<IMuninNode, MuninNode.MuninNode>()
+            .AddScoped<IMuninNode, MuninNode.SocketServer>()
             .AddScoped<IPluginProvider, EmptyPluginProvider>()
             .AddScoped<IAccessRule, AccessRuleFromConfig>()
             .AddScoped<MuninNodeConfiguration>(_ => configuration.BuildMuninNodeConfig())
 
+            .AddScoped<MuninProtocol>()
+            .AddScoped<ICommand, QuitCommand>()
+            .AddScoped<ICommand, ShortQuitCommand>()
             .AddScoped<ICommand, CapCommand>()
             .AddScoped<ICommand, ConfigCommand>()
             .AddScoped<ICommand, FetchCommand>()

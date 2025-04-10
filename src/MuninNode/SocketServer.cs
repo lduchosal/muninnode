@@ -9,8 +9,6 @@ using System.Security.Cryptography;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using MuninNode.AccessRules;
-using MuninNode.Commands;
-using MuninNode.Plugins;
 
 namespace MuninNode;
 
@@ -18,13 +16,11 @@ namespace MuninNode;
 /// Provides an extensible base class with basic Munin-Node functionality.
 /// </summary>
 /// <seealso href="https://guide.munin-monitoring.org/en/latest/node/index.html">The Munin node</seealso>
-public class MuninNode(
-    ILogger<MuninNode> logger,
+public class SocketServer(
+    ILogger<SocketServer> logger,
+    MuninProtocol protocol,
     MuninNodeConfiguration config,
-    IPluginProvider pluginProvider,
-    IAccessRule accessRule,
-    IEnumerable<ICommand> commands,
-    IDefaultCommand help)
+    IAccessRule accessRule)
     : IMuninNode, IDisposable, IAsyncDisposable
 {
     private static Encoding Encoding => Encoding.Default;
@@ -74,7 +70,7 @@ public class MuninNode(
         }
         catch (SocketException)
         {
-// swallow
+            // swallow
         }
 
         Server?.Close();
@@ -161,10 +157,11 @@ public class MuninNode(
 
             try
             {
+                var banner = protocol.GetBanner();
                 await SendResponseAsync(
                     client,
                     Encoding,
-                    cancellationToken, [$"# munin node at {config.Hostname}"]).ConfigureAwait(false);
+                    cancellationToken, banner).ConfigureAwait(false);
             }
             catch (SocketException ex) when (
                 ex.SocketErrorCode is
@@ -197,22 +194,10 @@ public class MuninNode(
 
             try
             {
-                await pluginProvider
-                    .ReportSessionStartedAsync(sessionId, cancellationToken)
-                    .ConfigureAwait(false)
-                    ;
+                await protocol.SessionStartedAsync(sessionId, cancellationToken);
 
-                foreach (var plugin in pluginProvider.Plugins)
-                {
-                    await plugin
-                        .ReportSessionStartedAsync(sessionId, cancellationToken)
-                        .ConfigureAwait(false)
-                        ;
-                }
-
-// https://docs.microsoft.com/ja-jp/dotnet/standard/io/pipelines
+                // https://docs.microsoft.com/ja-jp/dotnet/standard/io/pipelines
                 var pipe = new Pipe();
-
                 await Task.WhenAll(
                     ReceiveCommandAsync(client, remoteEndPoint, pipe.Writer, cancellationToken),
                     ProcessCommandAsync(client, remoteEndPoint, pipe.Reader, cancellationToken)
@@ -222,18 +207,7 @@ public class MuninNode(
             }
             finally
             {
-                foreach (var plugin in pluginProvider.Plugins)
-                {
-                    await plugin
-                        .ReportSessionClosedAsync(sessionId, cancellationToken)
-                        .ConfigureAwait(false)
-                        ;
-                }
-
-                await pluginProvider
-                    .ReportSessionClosedAsync(sessionId, cancellationToken)
-                    .ConfigureAwait(false)
-                    ;
+                await protocol.SessionClosedAsync(sessionId, cancellationToken);
             }
         }
         finally
@@ -403,58 +377,33 @@ public class MuninNode(
         CancellationToken cancellationToken
     )
     {
-        if (
-            commandLine.Expect("quit"u8, out _) 
-            || commandLine.Expect("."u8, out _) // quit short
-        )
+        var result = await protocol.HandleCommandAsync(commandLine, cancellationToken);
+        if (result.Status == Status.Quit)
         {
             client.Close();
             return;
-        }
-        
-        string[] result = [];
-        var matched = false;
-        foreach (var command in commands)
-        {
-            if (!commandLine.Expect(command.Name, out var args))
-            {
-                continue;
-            }
-            result = await command.ProcessAsync(args, cancellationToken);
-            matched = true;
-            break;
-        }
-        if (!matched)
-        {
-            result = await help.ProcessAsync(ReadOnlySequence<byte>.Empty, cancellationToken);
         }
         
         await SendResponseAsync(
             client: client,
             encoding: Encoding,
             cancellationToken: cancellationToken, 
-            responseLines: result);
+            responseLines: result.Lines);
     }
     
-    private static async ValueTask SendResponseAsync(Socket client,
+    private static async ValueTask SendResponseAsync(
+        Socket client,
         Encoding encoding,
         CancellationToken cancellationToken,
-        params string[] responseLines)
+        List<string> responseLines)
     {
         cancellationToken.ThrowIfCancellationRequested();
 
         foreach (var responseLine in responseLines)
         {
             var resp = encoding.GetBytes(responseLine);
-
             await client.SendAsync(
                 buffer: resp,
-                socketFlags: SocketFlags.None,
-                cancellationToken: cancellationToken
-            ).ConfigureAwait(false);
-
-            await client.SendAsync(
-                buffer: Sequence.EndOfLine,
                 socketFlags: SocketFlags.None,
                 cancellationToken: cancellationToken
             ).ConfigureAwait(false);

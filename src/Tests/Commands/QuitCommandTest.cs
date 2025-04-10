@@ -1,28 +1,24 @@
 using System.Buffers;
-using MuninNode.Plugins;
-using Tests;
 
 namespace MuninNode.Commands;
 
 [TestClass]
 [TestCategory("Command")]
-public class ListCommandTest 
+public class QuitCommandTest 
 {
     [TestMethod]
     public async Task Test()
     {
         // Prepare
-        var plugins = new EmptyPluginProvider();
         var tokenSource = new CancellationTokenSource(200);
         var args = ReadOnlySequence<byte>.Empty;
-        var command = new ListCommand(plugins);
+        var command = new QuitCommand();
         
         // Act
         var result = await command.ProcessAsync(args, tokenSource.Token);
         
         // Assert
-        Assert.AreEqual(Status.Continue, result.Status);
-        Assert.AreEqual(1, result.Lines.Count);
-        Assert.IsTrue(string.IsNullOrEmpty(result.Lines[0]), result.Lines[0]);
+        Assert.AreEqual(Status.Quit, result.Status);
+        Assert.AreEqual(0, result.Lines.Count);
     }
 }

@@ -8,9 +8,14 @@ public class VersionCommand(MuninNodeConfiguration config) : ICommand
     private static readonly Version DefaultNodeVersion = new(1, 0, 0, 0);
     private static Version NodeVersion => DefaultNodeVersion;
 
-    public Task<string[]> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
+    public Task<HanldeResult> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
-        var result = $"munins node on {config.Hostname} version: {NodeVersion}";
-        return Task.FromResult<string[]>([result]);
+        var result = new HanldeResult
+        {
+            Lines = [$"munins node on {config.Hostname} version: {NodeVersion}"],
+            Status = Status.Continue
+        };
+
+        return Task.FromResult(result);
     }
 }

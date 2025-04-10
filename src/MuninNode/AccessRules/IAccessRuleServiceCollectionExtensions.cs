@@ -10,7 +10,7 @@ namespace MuninNode.AccessRules;
 public static class AccessRuleServiceCollectionExtensions
 {
     /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
-    /// <param name="addressListAllowFrom">The <see cref="IReadOnlyList{T}"/> indicates the read-only list of addresses allowed to access <see cref="MuninNode"/>.</param>
+    /// <param name="addressListAllowFrom">The <see cref="IReadOnlyList{T}"/> indicates the read-only list of addresses allowed to access <see cref="SocketServer"/>.</param>
     public static IServiceCollection AddMuninNodeAccessRule(
         this IServiceCollection services,
         IReadOnlyList<IPAddress> addressListAllowFrom
@@ -24,7 +24,7 @@ public static class AccessRuleServiceCollectionExtensions
         );
 
     /// <param name="services">The <see cref="IServiceCollection"/> to add services to.</param>
-    /// <param name="accessRule">The <see cref="IAccessRule"/> which defines access rules to <see cref="MuninNode"/>.</param>
+    /// <param name="accessRule">The <see cref="IAccessRule"/> which defines access rules to <see cref="SocketServer"/>.</param>
     public static IServiceCollection AddMuninNodeAccessRule(
         this IServiceCollection services,
         IAccessRule accessRule

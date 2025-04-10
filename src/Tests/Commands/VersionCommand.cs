@@ -22,7 +22,8 @@ public class VersionCommandTest
         var result = await command.ProcessAsync(args, tokenSource.Token);
         
         // Assert
-        Assert.AreEqual(1, result.Length);
-        Assert.IsTrue(result[0].Contains(config.Hostname), result[0]);
+        Assert.AreEqual(Status.Continue, result.Status);
+        Assert.AreEqual(1, result.Lines.Count);
+        Assert.IsTrue(result.Lines[0].Contains(config.Hostname), result.Lines[0]);
     }
 }

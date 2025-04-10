@@ -23,8 +23,9 @@ public class NodeCommandTest
         var result = await command.ProcessAsync(args, tokenSource.Token);
         
         // Assert
-        Assert.AreEqual(2, result.Length);
-        Assert.IsTrue(result[0].Contains(config.Hostname));
-        Assert.IsTrue(result[1].Contains("."));
+        Assert.AreEqual(Status.Continue, result.Status);
+        Assert.AreEqual(2, result.Lines.Count);
+        Assert.IsTrue(result.Lines[0].Contains(config.Hostname));
+        Assert.IsTrue(result.Lines[1].Contains("."));
     }
 }

@@ -11,11 +11,10 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
 
     private static readonly string[] ResponseLinesUnknownService =
     [
-        "# Unknown service",
-        "."
+
     ];
 
-    public async Task<string[]> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
+    public async Task<HanldeResult> ProcessAsync(ReadOnlySequence<byte> arguments, CancellationToken cancellationToken)
     {
         var plugin = pluginProvider.Plugins.FirstOrDefault(
             plugin => string.Equals(Encoding.GetString(arguments), plugin.Name, StringComparison.Ordinal)
@@ -23,7 +22,12 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
 
         if (plugin == null)
         {
-            return ResponseLinesUnknownService;
+            var result = new HanldeResult
+            {
+                Lines = new List<string> { "# Unknown service", "." }, 
+                Status = Status.Continue
+            };
+            return result;
         }
 
         var responseLines = new List<string>(capacity: plugin.Fields.Count + 1);
@@ -38,6 +42,11 @@ public class FetchCommand(IPluginProvider pluginProvider) : ICommand, IDefaultCo
         }
 
         responseLines.Add(".");
-        return responseLines.ToArray();
+        var result2 = new HanldeResult
+        {
+            Lines = responseLines,
+            Status = Status.Continue
+        };
+        return result2;
     }
 }

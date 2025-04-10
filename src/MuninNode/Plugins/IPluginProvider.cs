@@ -14,6 +14,6 @@ public interface IPluginProvider : ISessionCallback
     ///   <para>The the collection returned from this property should not be changed during the processing of each request session.</para>
     /// </remarks>
     /// <seealso cref="IPlugin"/>
-    /// <seealso cref="MuninNode"/>
+    /// <seealso cref="SocketServer"/>
     IReadOnlyCollection<IPlugin> Plugins { get; }
 }
