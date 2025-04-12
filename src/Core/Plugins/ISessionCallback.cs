@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2023 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 
+using MuninNode.Server;
+
 namespace MuninNode.Plugins;
 
 /// <summary>
@@ -11,16 +13,16 @@ public interface ISessionCallback
     /// <summary>
     /// Implements a callback to be called when <c>munin-update</c> starts a session.
     /// </summary>
-    /// <remarks>This method is called back when the <see cref="SocketServer"/> starts processing a session.</remarks>
-    /// <param name="sessionId">A unique ID that <see cref="SocketServer"/> associates with the session.</param>
+    /// <remarks>This method is called back when the <see cref="MuninServer"/> starts processing a session.</remarks>
+    /// <param name="sessionId">A unique ID that <see cref="MuninServer"/> associates with the session.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" /> to monitor for cancellation requests.</param>
     Task ReportSessionStartedAsync(string sessionId, CancellationToken cancellationToken);
 
     /// <summary>
     /// Implements a callback to be called when <c>munin-update</c> ends a session.
     /// </summary>
-    /// <remarks>This method is called back when the <see cref="SocketServer"/> ends processing a session.</remarks>
-    /// <param name="sessionId">A unique ID that <see cref="SocketServer"/> associates with the session.</param>
+    /// <remarks>This method is called back when the <see cref="MuninServer"/> ends processing a session.</remarks>
+    /// <param name="sessionId">A unique ID that <see cref="MuninServer"/> associates with the session.</param>
     /// <param name="cancellationToken">The <see cref="CancellationToken" /> to monitor for cancellation requests.</param>
     Task ReportSessionClosedAsync(string sessionId, CancellationToken cancellationToken);
 }

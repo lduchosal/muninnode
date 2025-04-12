@@ -4,7 +4,7 @@ using MuninNode;
 namespace Tests;
 
 [TestClass]
-public class SocketServerTest
+public class MuninServerTest
 {
 
     [TestMethod]

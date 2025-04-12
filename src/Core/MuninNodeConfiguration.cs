@@ -17,10 +17,10 @@ public static class ConfigurationExt
     {
         return new MuninNodeConfiguration
         {
-            Port = configuration?["MuninNode:Port"]?.ToInt() ?? 4949,
-            Listen = configuration?["MuninNode:Listen"]?.ToIPAddress() ?? IPAddress.Loopback,
-            Hostname = configuration?["MuninNode:Hostname"] ?? "localhost",
-            AllowFrom = configuration?["MuninNode:AllowFrom"]?.ToNetworkList() ??
+            Port = configuration?["Core:Port"]?.ToInt() ?? 4949,
+            Listen = configuration?["Core:Listen"]?.ToIPAddress() ?? IPAddress.Loopback,
+            Hostname = configuration?["Core:Hostname"] ?? "localhost",
+            AllowFrom = configuration?["Core:AllowFrom"]?.ToNetworkList() ??
             [IPAddress.Loopback, IPAddress.IPv6Loopback]
         };
     }

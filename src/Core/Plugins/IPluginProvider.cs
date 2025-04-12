@@ -1,6 +1,8 @@
 // SPDX-FileCopyrightText: 2023 smdn <smdn@smdn.jp>
 // SPDX-License-Identifier: MIT
 
+using MuninNode.Server;
+
 namespace MuninNode.Plugins;
 
 /// <summary>
@@ -14,6 +16,6 @@ public interface IPluginProvider : ISessionCallback
     ///   <para>The the collection returned from this property should not be changed during the processing of each request session.</para>
     /// </remarks>
     /// <seealso cref="IPlugin"/>
-    /// <seealso cref="SocketServer"/>
+    /// <seealso cref="MuninServer"/>
     IReadOnlyCollection<IPlugin> Plugins { get; }
 }

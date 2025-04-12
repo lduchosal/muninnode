@@ -55,10 +55,10 @@ public class MuninNodeConfigurationTest {
 
     var appsettings = new Dictionary<string, string?>
     {
-      {"MuninNode:Port", "9876"},
-      {"MuninNode:Hostname", "appsettings"},
-      {"MuninNode:Listen", "::1"},
-      {"MuninNode:AllowFrom", "127.0.0.1, 1.2.3.4, 5.6.7.8, 10.10.10.10"}
+      {"Core:Port", "9876"},
+      {"Core:Hostname", "appsettings"},
+      {"Core:Listen", "::1"},
+      {"Core:AllowFrom", "127.0.0.1, 1.2.3.4, 5.6.7.8, 10.10.10.10"}
     };
 
     var configuration = new ConfigurationBuilder()

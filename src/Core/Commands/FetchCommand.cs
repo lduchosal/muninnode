@@ -1,6 +1,7 @@
 using System.Buffers;
 using System.Text;
 using MuninNode.Plugins;
+using MuninNode.Server;
 
 namespace MuninNode.Commands;
 

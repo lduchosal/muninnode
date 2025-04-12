@@ -27,7 +27,7 @@ public class AccessRuleFromConfigTest {
     var ipendpoint = IPEndPoint.Parse(endpoint);
     var appsettings = new Dictionary<string, string?>
     {
-      {"MuninNode:AllowFrom", allowFrom}
+      {"Core:AllowFrom", allowFrom}
     };
     var configuration = new ConfigurationBuilder()
       .AddInMemoryCollection(appsettings)

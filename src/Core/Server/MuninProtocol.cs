@@ -2,7 +2,7 @@ using System.Buffers;
 using MuninNode.Commands;
 using MuninNode.Plugins;
 
-namespace MuninNode;
+namespace MuninNode.Server;
 
 public class HanldeResult
 {

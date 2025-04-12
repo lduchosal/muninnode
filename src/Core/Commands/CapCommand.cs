@@ -1,4 +1,5 @@
 using System.Buffers;
+using MuninNode.Server;
 
 namespace MuninNode.Commands;
 

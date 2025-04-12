@@ -1,19 +1,23 @@
 using System.Buffers;
+using MuninNode.Server;
 
 namespace MuninNode.Commands;
 
-public class HelpCommand : ICommand, IDefaultCommand
+public class NodeCommand(MuninNodeConfiguration config) : ICommand
 {
-    public ReadOnlySpan<byte> Name => "help"u8;
+    public ReadOnlySpan<byte> Name => "nodes"u8;
 
     public Task<HanldeResult> ProcessAsync(ReadOnlySequence<byte> args, CancellationToken cancellationToken)
     {
-        const string help = "# Unknown command. Try help, cap, list, nodes, config, fetch, version or quit";
         var result = new HanldeResult
         {
-            Lines = [ help ],
+            Lines = [
+                config.Hostname,
+                "."
+            ],
             Status = Status.Continue
         };
         return Task.FromResult(result);
+
     }
 }

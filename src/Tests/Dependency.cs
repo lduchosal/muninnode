@@ -4,6 +4,7 @@ using MuninNode;
 using MuninNode.AccessRules;
 using MuninNode.Commands;
 using MuninNode.Plugins;
+using MuninNode.Server;
 
 namespace Tests;
 
@@ -18,10 +19,10 @@ public static class Dependency
     {
         var settings = new Dictionary<string, string?>
         {
-            { "MuninNode:Listen", $"{listen}" },
-            { "MuninNode:Port", $"{port}" },
-            { "MuninNode:Hostname", $"{hostname}" },
-            { "MuninNode:AllowFrom", $"{allowFrom}" },
+            { "Core:Listen", $"{listen}" },
+            { "Core:Port", $"{port}" },
+            { "Core:Hostname", $"{hostname}" },
+            { "Core:AllowFrom", $"{allowFrom}" },
         };
 
         var configuration = new ConfigurationBuilder()
@@ -31,11 +32,16 @@ public static class Dependency
         services
             .AddLogging()
 
-            .AddScoped<IMuninNode, MuninNode.SocketServer>()
+            .AddScoped<IMuninNode, MuninServer>()
             .AddScoped<IPluginProvider, EmptyPluginProvider>()
             .AddScoped<IAccessRule, AccessRuleFromConfig>()
             .AddScoped<MuninNodeConfiguration>(_ => configuration.BuildMuninNodeConfig())
 
+            .AddScoped<MuninServer>()
+            .AddScoped<SessionManager>()
+            .AddScoped<SocketListener>()
+            .AddScoped<MuninServer>()
+            .AddScoped<CommunicationHandler>()
             .AddScoped<MuninProtocol>()
             .AddScoped<ICommand, QuitCommand>()
             .AddScoped<ICommand, ShortQuitCommand>()
