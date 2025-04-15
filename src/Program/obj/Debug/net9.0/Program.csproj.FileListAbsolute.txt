@@ -1,0 +1,6 @@
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.csproj.AssemblyReference.cache
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.GeneratedMSBuildEditorConfig.editorconfig
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.AssemblyInfoInputs.cache
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.AssemblyInfo.cs
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.csproj.CoreCompileInputs.cache
+/Users/q/Projects/muninnode/src/Program/obj/Debug/net9.0/Program.sourcelink.json

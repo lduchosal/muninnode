@@ -16,7 +16,7 @@ public class SocketListener : Socket
         Server = CreateServerSocket();
     }
 
-    public EndPoint? LocalEndPoint => Server.LocalEndPoint;
+    public new EndPoint? LocalEndPoint => Server.LocalEndPoint;
 
     internal Socket CreateServerSocket()
     {
