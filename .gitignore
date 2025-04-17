@@ -5,3 +5,8 @@ src/Tests/bin/
 src/Tests/obj/
 src/Plugins/bin/
 src/Plugins/obj/
+src/Core/bin/
+src/Core/obj/
+src/Program/bin/
+src/Program/obj/
+.DS_Store

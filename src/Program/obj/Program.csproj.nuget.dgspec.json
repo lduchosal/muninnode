@@ -44,12 +44,6 @@
       "frameworks": {
         "net9.0": {
           "targetAlias": "net9.0",
-          "dependencies": {
-            "Akka.Streams": {
-              "target": "Package",
-              "version": "[1.5.40, )"
-            }
-          },
           "imports": [
             "net461",
             "net462",

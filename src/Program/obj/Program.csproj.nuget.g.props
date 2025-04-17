@@ -12,7 +12,4 @@
   <ItemGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
     <SourceRoot Include="/Users/q/.nuget/packages/" />
   </ItemGroup>
-  <PropertyGroup Condition=" '$(ExcludeRestorePackageImports)' != 'true' ">
-    <PkgAkka_Analyzers Condition=" '$(PkgAkka_Analyzers)' == '' ">/Users/q/.nuget/packages/akka.analyzers/0.3.1</PkgAkka_Analyzers>
-  </PropertyGroup>
 </Project>

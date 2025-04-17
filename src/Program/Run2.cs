@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 class Program2
 {
-    static async Task Main(string[] args)
+    static async Task _Main(string[] args)
     {
         // Server configuration
         string ipAddress = "127.0.0.1";

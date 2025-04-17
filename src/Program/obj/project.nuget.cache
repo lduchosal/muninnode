@@ -1,24 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "+APAM8txwrE=",
+  "dgSpecHash": "n4iziv1CU98=",
   "success": true,
   "projectFilePath": "/Users/q/Projects/muninnode/src/Program/Program.csproj",
-  "expectedPackageFiles": [
-    "/Users/q/.nuget/packages/akka/1.5.40/akka.1.5.40.nupkg.sha512",
-    "/Users/q/.nuget/packages/akka.analyzers/0.3.1/akka.analyzers.0.3.1.nupkg.sha512",
-    "/Users/q/.nuget/packages/akka.streams/1.5.40/akka.streams.1.5.40.nupkg.sha512",
-    "/Users/q/.nuget/packages/google.protobuf/3.26.1/google.protobuf.3.26.1.nupkg.sha512",
-    "/Users/q/.nuget/packages/microsoft.extensions.objectpool/6.0.36/microsoft.extensions.objectpool.6.0.36.nupkg.sha512",
-    "/Users/q/.nuget/packages/microsoft.win32.systemevents/6.0.0/microsoft.win32.systemevents.6.0.0.nupkg.sha512",
-    "/Users/q/.nuget/packages/newtonsoft.json/13.0.1/newtonsoft.json.13.0.1.nupkg.sha512",
-    "/Users/q/.nuget/packages/reactive.streams/1.0.4/reactive.streams.1.0.4.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.collections.immutable/6.0.1/system.collections.immutable.6.0.1.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.configuration.configurationmanager/6.0.1/system.configuration.configurationmanager.6.0.1.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.drawing.common/6.0.0/system.drawing.common.6.0.0.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.security.accesscontrol/6.0.0/system.security.accesscontrol.6.0.0.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.security.cryptography.protecteddata/6.0.0/system.security.cryptography.protecteddata.6.0.0.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.security.permissions/6.0.0/system.security.permissions.6.0.0.nupkg.sha512",
-    "/Users/q/.nuget/packages/system.windows.extensions/6.0.0/system.windows.extensions.6.0.0.nupkg.sha512"
-  ],
+  "expectedPackageFiles": [],
   "logs": []
 }

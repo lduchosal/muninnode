@@ -8,7 +8,7 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <PackageReference Include="Akka.Streams" Version="1.5.40" />
+      <Compile Remove="Run.cs" />
     </ItemGroup>
 
 </Project>
