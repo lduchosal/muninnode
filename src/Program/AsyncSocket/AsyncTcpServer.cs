@@ -64,7 +64,9 @@ class AsyncTcpServer : IAsyncDisposable
     
     void OnAcceptArgsOnCompleted(object? s, SocketAsyncEventArgs e)
     {
-        var tcs = (TaskCompletionSource<Socket>)e.UserToken!;
+        ArgumentNullException.ThrowIfNull(e.UserToken, nameof(e.UserToken));
+        
+        var tcs = (TaskCompletionSource<Socket>)e.UserToken;
         if (e.SocketError == SocketError.Success
             && e.AcceptSocket != null)
         {
@@ -88,7 +90,7 @@ class AsyncTcpServer : IAsyncDisposable
             await HandleConnectedAsync(client);
 
             _clients.TryAdd(clientId, client);
-            client.MessageReceived += async (sender, message) =>
+            client.MessageReceived += async (_, message) =>
             {
                 await HandleMessageAsync(client, message);
             };
@@ -134,7 +136,7 @@ class AsyncTcpServer : IAsyncDisposable
 
     public async ValueTask DisposeAsync()
     {
-        _listener?.Close();
+        _listener.Close();
 
         var clientTasks = new List<Task>();
         foreach (var client in _clients.Values)

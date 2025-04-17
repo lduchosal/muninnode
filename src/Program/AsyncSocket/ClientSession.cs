@@ -11,7 +11,7 @@ class ClientSession
     private readonly byte[] _receiveBuffer;
     private readonly SocketAsyncEventArgsPool _argsPool;
     private readonly StringBuilder _stringBuffer;
-    private CancellationTokenSource Cts { get; set; } = null!;
+    private CancellationTokenSource Cts { get; set; } = new();
     private bool _isRunning;
     private readonly int _maxBufferSizeWithoutDelimiter;
 
@@ -67,7 +67,7 @@ class ClientSession
             
         _socket.Close();
             
-        Disconnected?.Invoke(this, Id);
+        Disconnected.Invoke(this, Id);
             
         await Task.CompletedTask;
     }
@@ -124,8 +124,9 @@ class ClientSession
 
     private void OnReceiveCompleted(object? sender, SocketAsyncEventArgs e)
     {
-        var tcs = (TaskCompletionSource<int>)e.UserToken!;
-            
+        ArgumentNullException.ThrowIfNull(e.UserToken, nameof(e.UserToken));
+        
+        var tcs = (TaskCompletionSource<int>)e.UserToken;
         if (e.SocketError == SocketError.Success)
         {
             tcs.TrySetResult(e.BytesTransferred);
@@ -187,7 +188,9 @@ class ClientSession
 
     private void OnSendCompleted(object? sender, SocketAsyncEventArgs e)
     {
-        var tcs = (TaskCompletionSource<bool>)e.UserToken!;
+        ArgumentNullException.ThrowIfNull(e.UserToken, nameof(e.UserToken));
+        
+        var tcs = (TaskCompletionSource<bool>)e.UserToken;
             
         if (e.SocketError == SocketError.Success)
         {
